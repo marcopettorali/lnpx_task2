@@ -158,12 +158,20 @@ public class MongoDBManager {
     }
 
     //Manca Le keywords passate e convertite in formato JSON
-    public static void insertKeywordAnalysis(Article a )
+    public static void insertKeywordAnalysis(Article a, Map<String, Integer> keyWordAnalysis )
     {
-        
+        ArrayList<Document> keyWordArray= new ArrayList<>();
+        String[] keys= keyWordAnalysis.keySet().toArray(new String[0]);
+        for(int i=0;i<keyWordAnalysis.size();i++)
+        {
+            Document keyword=new Document();
+            keyword.append("keyword",  keys[i]);
+            keyword.append("Occ", keyWordAnalysis.get(keys[i]));
+            keyWordArray.add(keyword);
+        }
         MongoCollection<Document> collection = database.getCollection("Article");
         BasicDBObject newUpdate=new BasicDBObject();
-        newUpdate.append("Keywords", a); //DA MODIFICARE
+        newUpdate.append("Keywords", keyWordArray); 
         
         BasicDBObject queryArticle=new BasicDBObject();
         queryArticle.append("Link", a.Link);
