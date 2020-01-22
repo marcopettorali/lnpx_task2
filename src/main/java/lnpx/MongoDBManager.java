@@ -67,11 +67,17 @@ public class MongoDBManager {
         
     }
     
-    public static void insertUser(User u)
+    public static boolean insertUser(User u)
     {
         MongoCollection<Document> collection = database.getCollection("Users");
+        BasicDBObject idQuery= new BasicDBObject("userID",u.userID);
+        if(collection.countDocuments(idQuery)!=0)
+        {
+            return false;
+        }
         Document docUser=u.toJSON();
-        collection.insertOne(docUser);   
+        collection.insertOne(docUser);
+        return true;
     }
     
     public static User userAuthentication(String userId, String password)
