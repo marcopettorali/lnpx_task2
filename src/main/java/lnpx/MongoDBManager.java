@@ -37,7 +37,8 @@ public class MongoDBManager {
         BasicDBObject andFindQuery= new BasicDBObject();
         List<BasicDBObject> obj= new ArrayList<>();
         obj.add(new BasicDBObject("Topic",F.Topic));
-        obj.add(new BasicDBObject("Authors",new BasicDBObject("$all",F.Authors)));  // Dubbio
+        if(!F.Authors.isEmpty())
+            obj.add(new BasicDBObject("Authors",new BasicDBObject("$all",F.Authors)));  // Dubbio
         obj.add(new BasicDBObject("Newspaper",F.Newspaper));
         obj.add(new BasicDBObject("Country",F.Country));
         obj.add(new BasicDBObject("Region",F.Region));
