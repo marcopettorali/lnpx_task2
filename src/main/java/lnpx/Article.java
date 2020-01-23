@@ -1,6 +1,5 @@
 package lnpx;
 
-
 import java.util.Date;
 import java.util.List;
 import org.bson.Document;
@@ -15,42 +14,46 @@ import org.bson.Document;
  * @author Riccardo
  */
 public class Article {
+
     public String Title;            //mandatory
     public String Link;             //mandatory
     public String Topic;            //mandatory
     public List<String> Authors;  //mandatory One or More
     public String Newspaper;        //mandatory
     public String Text;             //mandatory 
-    public Date   Date;             //mandatory
+    public Date Date;             //mandatory
     public String Country;
     public String Region;
-    public String City;   
-    
-    public Document toJSON(){
-        Document docArticle=new Document("Title",this.Title).append("Link", this.Link).append("Topic",this.Topic).append("Newspaper", this.Newspaper).append("Text", this.Text).append("date",this.Date);
-        if(this.Authors!=null)
+    public String City;
+
+    public Document toJSON() {
+        Document docArticle = new Document("Title", this.Title).append("Link", this.Link).append("Topic", this.Topic).append("Newspaper", this.Newspaper).append("Text", this.Text).append("date", this.Date);
+        if (this.Authors != null) {
             docArticle.append("Authors", this.Authors);
-        if(this.Country!=null)
+        }
+        if (this.Country != null) {
             docArticle.append("Country", this.Country);
-        if(this.Region!=null)
+        }
+        if (this.Region != null) {
             docArticle.append("Region", this.Region);
-        if(this.City!=null)
+        }
+        if (this.City != null) {
             docArticle.append("City", this.City);
-        
+        }
+
         return docArticle;
     }
-    
-    
-    public void fromJSON(Document d){
-        this.Title=(String) d.get("Title");
-        this.Link = (String) d.get("Link");             
-        this.Topic=(String) d.get("Topic");
-        this.Authors=(List<String>) d.get("Authors"); 
-        this.Newspaper=(String) d.get("Newspaper");
-        this.Text=(String) d.get("Text");
-        this.Date= (Date) d.get("Date");
-        this.Country=(String) d.get("Country");
-        this.Region=(String) d.get("Region");       
-        this.City=(String) d.get("City");       
+
+    public void fromJSON(Document d) {
+        this.Title = (String) d.get("Title");
+        this.Link = (String) d.get("Link");
+        this.Topic = (String) d.get("Topic");
+        this.Authors = (List<String>) d.get("Authors");
+        this.Newspaper = (String) d.get("Newspaper");
+        this.Text = (String) d.get("Text");
+        this.Date = (Date) d.get("Date");
+        this.Country = (String) d.get("Country");
+        this.Region = (String) d.get("Region");
+        this.City = (String) d.get("City");
     }
 }
