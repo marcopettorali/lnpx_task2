@@ -19,7 +19,7 @@ public class ServerRequestListener {
             try{
                 Socket socket = socketListener.accept();
                 ServerWorker worker = new ServerWorker(socket);
-                worker.setDaemon(true);//01.a
+                worker.setDaemon(true);
                 worker.start();
                 System.out.println("Accepted new request from " + socket.getInetAddress().getHostAddress());
             }catch(IOException ioe){
