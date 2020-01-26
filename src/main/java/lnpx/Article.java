@@ -2,6 +2,7 @@ package lnpx;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.bson.Document;
 
 /*
@@ -25,7 +26,8 @@ public class Article {
     public String Country;
     public String Region;
     public String City;
-
+    public  Map<String, Integer> keyWordAnalysis; //pensa a come trasformare la keyword doc in un Map
+    
     public Document toJSON() {
         Document docArticle = new Document("Title", this.Title).append("Link", this.Link).append("Topic", this.Topic).append("Newspaper", this.Newspaper).append("Text", this.Text).append("date", this.Date);
         if (this.Authors != null) {
