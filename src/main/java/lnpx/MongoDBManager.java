@@ -2,6 +2,7 @@ package lnpx;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import org.bson.Document;
 
@@ -31,6 +32,7 @@ public class MongoDBManager {
         /* *** QUERY *** */
         BasicDBObject andFindQuery = new BasicDBObject();
         List<BasicDBObject> obj = new ArrayList<>();
+        obj.add(new BasicDBObject("Keywords.keyword",F.Keyword));
         obj.add(new BasicDBObject("Topic", F.Topic));
         if (!F.Authors.isEmpty()) {
             obj.add(new BasicDBObject("Authors", new BasicDBObject("$all", F.Authors)));  // Dubbio
@@ -105,12 +107,20 @@ public class MongoDBManager {
      * user
      */
     public static ArrayList<Article> suggestedArticle(User u) {
+        SimpleDateFormat sdf = new SimpleDateFormat(); 
+        sdf.applyPattern("yyyy-MM-dd'T'HH:mm:ss.SSS\'Z\'");
+                
+        Date actualDate=new Date();
+        
+        Date queryDate= subtractDays(actualDate,7);
+        
 
         MongoCollection<Document> collection = database.getCollection("Search");
         ArrayList<Article> suggestedArticles = new ArrayList<>();
         AggregateIterable<Document> results;
         results = collection.aggregate(Arrays.asList(
                 new Document("$match", new Document("userID", u.userID)),
+                new Document("$match",new Document("date", new Document("$gt",queryDate))),
                 new Document("$group", new Document("_id", "$filters").append("value", new Document("$sum", 1))),
                 new Document("$sort", new Document("value", -1)),
                 new Document("$limit", 3)));
@@ -130,20 +140,45 @@ public class MongoDBManager {
      *
      * @return List<String> This contains the 10 tranding words of the moment
      */
-    public static List<String> calculateTrendingKeyWords() {
+    public static Map<String,Double> calculateTrendingKeyWords() {
+        Map<String,Double> keyWordValue=new HashMap();
+        double valueOfKeyword;
+        SimpleDateFormat sdf = new SimpleDateFormat(); 
+        sdf.applyPattern("yyyy-MM-dd'T'HH:mm:ss.SSS\'Z\'");
+                
+        Date actualDate=new Date();
+        
+        Date queryDate= subtractDays(actualDate,100 );
+        
         MongoCollection<Document> collection = database.getCollection("Article");
-        ArrayList<String> trendingKeywords = new ArrayList<>();
+       // ArrayList<String> trendingKeywords = new ArrayList<>();
         AggregateIterable<Document> results;
         results = collection.aggregate(Arrays.asList(
+               // new Document("$match",new Document("date", new Document("$gt",queryDate))),
                 new Document("$unwind", "$Keywords"),
-                new Document("$group", new Document("_id", "$Keywords.keyword").append("Occur", new Document("$sum", "$Keyword.Occ"))),
-                new Document("$sort", new Document("value", -1)),
-                new Document("$limit", 10)));
+                new Document("$group", new Document("_id", "$Keywords.keyword")
+                        .append("Occur", new Document("$sum", "$Keywords.Occ"))
+                        .append("NumberOfArticles",new Document("$sum", 1.0))),
+                new Document("$sort", new Document("NumberOfArticles", -1))));
+       
         for (Document dbObject : results) {
-            System.out.println((String) dbObject.get("_id"));
-            trendingKeywords.add((String) dbObject.get("_id"));
+            //Formula NumeroArticoli^2*Occorenze
+            double nOcc=dbObject.getDouble("Occur");
+            double nArticle= dbObject.getDouble("NumberOfArticles");
+            valueOfKeyword= nOcc*nArticle*nArticle;
+            keyWordValue.put((String) dbObject.get("_id"), valueOfKeyword);
+           // System.out.println((String) dbObject.get("_id"));
+           // trendingKeywords.add((String) dbObject.get("_id"));
         }
-        return trendingKeywords;
+        return keyWordValue;
+    }
+        
+    private static Date subtractDays(Date date, int days) {
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(date);
+		cal.add(Calendar.DATE, -days);
+				
+		return cal.getTime();
     }
 
     //Manca Le keywords passate e convertite in formato JSON
@@ -159,6 +194,10 @@ public class MongoDBManager {
         MongoCollection<Document> collection = database.getCollection("Article");
         BasicDBObject newUpdate = new BasicDBObject();
         newUpdate.append("Keywords", keyWordArray);
+        
+        BasicDBObject setQuery = new BasicDBObject();
+        setQuery.append("$set", newUpdate);
+        
 
         BasicDBObject queryArticle = new BasicDBObject();
         queryArticle.append("Link", a.Link);
@@ -169,7 +208,7 @@ public class MongoDBManager {
     public static void createIndexes() {
         MongoCollection<Document> collection = database.getCollection("Article");
         BasicDBObject obj = new BasicDBObject();
-        obj.put("Topic", 1);
+        obj.put("Topic", 1); //
         obj.put("Date", -1);
         collection.createIndex(obj);
         obj = new BasicDBObject();
@@ -183,4 +222,21 @@ public class MongoDBManager {
 
     }
 
+    public static Map<String, Integer> retriveUsersInformation()
+    {
+        Map<String,Integer> usersInfo = new HashMap();
+        MongoCollection<Document> collection = database.getCollection("Search");
+        ArrayList<String> usersAggregation = new ArrayList<>();
+        AggregateIterable<Document> results;
+        results = collection.aggregate(Arrays.asList(
+                new Document("$group", new Document("_id", "$userID").append("value", new Document("$sum", 1))),
+                new Document("$sort", new Document("value", -1))));
+        
+        for (Document dbObject : results) {
+            usersInfo.put((String) dbObject.get("_id"), (Integer) dbObject.get("value"));
+        }
+        
+        return usersInfo;
+    }
+    
 }
