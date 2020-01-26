@@ -29,6 +29,7 @@ public class ServerWorker extends Thread {
         try {
             SignInMsg msg = (SignInMsg) ois.readObject();
             //[...] insert code here
+            //boolean insertUser(User)
 
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
@@ -39,6 +40,7 @@ public class ServerWorker extends Thread {
         try {
             LoginMsg msg = (LoginMsg) ois.readObject();
             //[...] insert code here
+            //(User|null) userAuthentication(userId, password)
 
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
@@ -47,16 +49,20 @@ public class ServerWorker extends Thread {
 
     private void trend() {
         //[...] insert code here
+        //Map<String, double> calculateTrendingKeyWord()
     }
 
     private void recommended() {
         //[...] insert code here
+        //List<Article> suggestedArticles(User)
     }
 
     private void search() {
         try {
             SearchMsg msg = (SearchMsg) ois.readObject();
             //[...] insert code here
+            //insertSearch(Search)
+            //List<Article> findArticles(Filters)
 
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
@@ -65,12 +71,14 @@ public class ServerWorker extends Thread {
 
     private void clients() {
        //[...] insert code here
+       //TODO!!!!
     }
 
     private void changePeriod() {
         try {
             ChangePeriodMsg msg = (ChangePeriodMsg) ois.readObject();
             //[...] insert code here
+            //TODO!!!
 
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
