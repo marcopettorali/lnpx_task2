@@ -15,6 +15,7 @@ import org.bson.Document;
  */
 public class Filters {
 
+    public String Keyword;
     public String Topic;
     public List<String> Authors;
     public String Newspaper;
@@ -24,6 +25,9 @@ public class Filters {
 
     public Document toJSON() {
         Document docFilters = new Document();
+        if (this.Keyword!=null){
+              docFilters.append("Keyword", this.Keyword);
+        }
         if (this.Topic != null) {
             docFilters.append("Topic", this.Topic);
         }
@@ -47,7 +51,7 @@ public class Filters {
     }
 
     public void fromJSON(Document d) {
-
+        this.Keyword = (String) d.get("Keyword");
         this.Topic = (String) d.get("Topic");
         this.Authors = (List<String>) d.get("Authors");
         this.Newspaper = (String) d.get("Newspaper");
