@@ -20,6 +20,7 @@ public class User {
     public Date dateOfBirth;
     public String email;
     public String password;
+    public boolean adminStatus; //true=admin ; false=simple user
 
     public Document toJSON() {
         Document docUser = new Document();
@@ -29,6 +30,7 @@ public class User {
         docUser.append("dateOfBirth", this.dateOfBirth);
         docUser.append("email", this.email);
         docUser.append("password", this.password);
+        docUser.append("adminStatus", this.adminStatus);
         return docUser;
     }
 
@@ -40,6 +42,7 @@ public class User {
         this.dateOfBirth = d.getDate("dateOfBirth");
         this.email = d.getString("email");
         this.password = d.getString("password");
+        this.adminStatus=d.getBoolean("adminStatus");
     }
 
 }
