@@ -118,6 +118,7 @@ public class MongoDBManager {
         MongoCollection<Document> collection = database.getCollection("Search");
         ArrayList<Article> suggestedArticles = new ArrayList<>();
         AggregateIterable<Document> results;
+        //forse le sue match si possono fare con un append!
         results = collection.aggregate(Arrays.asList(
                 new Document("$match", new Document("userID", u.userID)),
                 new Document("$match",new Document("date", new Document("$gt",queryDate))),
@@ -238,5 +239,29 @@ public class MongoDBManager {
         
         return usersInfo;
     }
+    
+     public static ArrayList<Article> findArticlesNoKeywords() {
+        MongoCollection<Document> collection = database.getCollection("Article");
+        ArrayList<Article> resultArticles = new ArrayList<>();
+        /* *** QUERY *** */
+        BasicDBObject FindQuery = new BasicDBObject();
+        FindQuery.append("Keywords", new BasicDBObject("$exists",false));
+
+        MongoCursor<Document> cursor = collection.find(FindQuery).iterator();
+        try {
+            while (cursor.hasNext()) {
+                Document d = cursor.next();
+                System.out.println(d.toJson());
+                Article A = new Article();
+                A.fromJSON(d);
+                resultArticles.add(A);
+            }
+        } finally {
+            cursor.close();
+        }
+        return resultArticles;
+
+    }
+    
     
 }
