@@ -12,12 +12,19 @@ import org.bson.Document;
  *
  * @author Riccardo
  */
-public class Search {
+public class View {
 
     public String userID;
     public String linkArticle;
     public Date dateRead; //Timestamp?
     public Filters usedFilters;
+
+    public View(String userID, String linkArticle, Date dateRead, Filters usedFilters) {
+        this.userID = userID;
+        this.linkArticle = linkArticle;
+        this.dateRead = dateRead;
+        this.usedFilters = usedFilters;
+    }
 
     public Document toJSON() {
         Document docSearch = new Document();

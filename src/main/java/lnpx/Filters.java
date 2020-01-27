@@ -15,49 +15,61 @@ import org.bson.Document;
  */
 public class Filters {
 
-    public String Keyword;
-    public String Topic;
-    public List<String> Authors;
-    public String Newspaper;
-    public String Country;
-    public String Region;
-    public String City;
+    public String keyWord;
+    public String topic;
+    public String author;
+    public String newspaper;
+    public String country;
+    public String region;
+    public String city;
+    
+    public Filters(){}
+
+    public Filters(String Keyword, String Topic,String Author, String Newspaper, String Country, String Region, String City) {
+        this.keyWord = Keyword;
+        this.topic = Topic;
+        this.author = Author;
+        this.newspaper = Newspaper;
+        this.country = Country;
+        this.region = Region;
+        this.city = City;
+    }
 
     public Document toJSON() {
         Document docFilters = new Document();
-        if (this.Keyword!=null){
-              docFilters.append("Keyword", this.Keyword);
+        if (this.keyWord!=null){
+              docFilters.append("Keyword", this.keyWord);
         }
-        if (this.Topic != null) {
-            docFilters.append("Topic", this.Topic);
+        if (this.topic != null) {
+            docFilters.append("Topic", this.topic);
         }
-        if (this.Authors != null) {
-            docFilters.append("Authors", this.Authors);
+        if (this.author != null) {
+            docFilters.append("Authors", this.author);
         }
-        if (this.Newspaper != null) {
-            docFilters.append("Newspaper", this.Newspaper);
+        if (this.newspaper != null) {
+            docFilters.append("Newspaper", this.newspaper);
         }
-        if (this.Country != null) {
-            docFilters.append("Country", this.Country);
+        if (this.country != null) {
+            docFilters.append("Country", this.country);
         }
-        if (this.Region != null) {
-            docFilters.append("Region", this.Region);
+        if (this.region != null) {
+            docFilters.append("Region", this.region);
         }
-        if (this.City != null) {
-            docFilters.append("City", this.City);
+        if (this.city != null) {
+            docFilters.append("City", this.city);
         }
 
         return docFilters;
     }
 
     public void fromJSON(Document d) {
-        this.Keyword = (String) d.get("Keyword");
-        this.Topic = (String) d.get("Topic");
-        this.Authors = (List<String>) d.get("Authors");
-        this.Newspaper = (String) d.get("Newspaper");
-        this.Country = (String) d.get("Country");
-        this.Region = (String) d.get("Region");
-        this.City = (String) d.get("City");
+        this.keyWord = (String) d.get("Keyword");
+        this.topic = (String) d.get("Topic");
+        this.author = (String) d.get("Authors");
+        this.newspaper = (String) d.get("Newspaper");
+        this.country = (String) d.get("Country");
+        this.region = (String) d.get("Region");
+        this.city = (String) d.get("City");
     }
 
 }

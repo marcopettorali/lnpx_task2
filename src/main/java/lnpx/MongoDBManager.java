@@ -32,15 +32,15 @@ public class MongoDBManager {
         /* *** QUERY *** */
         BasicDBObject andFindQuery = new BasicDBObject();
         List<BasicDBObject> obj = new ArrayList<>();
-        obj.add(new BasicDBObject("Keywords.keyword",F.Keyword));
-        obj.add(new BasicDBObject("Topic", F.Topic));
-        if (!F.Authors.isEmpty()) {
-            obj.add(new BasicDBObject("Authors", new BasicDBObject("$all", F.Authors)));  // Dubbio
+        obj.add(new BasicDBObject("Keywords.keyword",F.keyWord));
+        obj.add(new BasicDBObject("Topic", F.topic));
+        if (!F.author.isEmpty()) {
+            obj.add(new BasicDBObject("Authors", new BasicDBObject("$all", F.author)));  // Dubbio
         }
-        obj.add(new BasicDBObject("Newspaper", F.Newspaper));
-        obj.add(new BasicDBObject("Country", F.Country));
-        obj.add(new BasicDBObject("Region", F.Region));
-        obj.add(new BasicDBObject("City", F.City));
+        obj.add(new BasicDBObject("Newspaper", F.newspaper));
+        obj.add(new BasicDBObject("Country", F.country));
+        obj.add(new BasicDBObject("Region", F.region));
+        obj.add(new BasicDBObject("City", F.city));
         andFindQuery.put("$and", obj);
 
         System.out.println(andFindQuery.toString());
@@ -92,7 +92,7 @@ public class MongoDBManager {
         return u;
     }
 
-    public static void insertSearch(Search s) {
+    public static void insertView(View s) {
         MongoCollection<Document> collection = database.getCollection("Search");
         Document docSearch = s.toJSON();
         collection.insertOne(docSearch);
@@ -106,7 +106,7 @@ public class MongoDBManager {
      * @return suggestedArticles Array of suggested articles for the specifi
      * user
      */
-    public static ArrayList<Article> suggestedArticle(User u) {
+    public static ArrayList<Article> suggestedArticles(User u) {
         SimpleDateFormat sdf = new SimpleDateFormat(); 
         sdf.applyPattern("yyyy-MM-dd'T'HH:mm:ss.SSS\'Z\'");
                 
@@ -222,7 +222,7 @@ public class MongoDBManager {
 
     }
 
-    public static Map<String, Integer> retriveUsersInformation()
+    public static Map<String, Integer> retrieveUsersInformation()
     {
         Map<String,Integer> usersInfo = new HashMap();
         MongoCollection<Document> collection = database.getCollection("Search");

@@ -3,11 +3,12 @@ package lnpx;
 import java.io.*;
 import java.net.*;
 
-public class ServerRequestListener {
+public class ServerRequestListener extends Thread {
     private final static int port = 7799;
     private static ServerSocket socketListener;
-    
-    public static void main(String[] args) {
+   
+    @Override
+    public void run() {
         System.out.println("Server starting now...");
         try{
             socketListener = new ServerSocket(port, 10);
@@ -26,5 +27,5 @@ public class ServerRequestListener {
                 System.out.println(ioe.getMessage());
             }
         }
-    }  
+    }
 }

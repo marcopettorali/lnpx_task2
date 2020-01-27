@@ -1,23 +1,18 @@
 package lnpx.messages;
 
 import java.io.Serializable;
+import java.util.*;
 
 public class ChangeSitesMsg implements Serializable{
 
-    private String[] sites;
-    private boolean[] values;
+    private Map<String, Boolean> sites;
 
-    public ChangeSitesMsg(String[] sites, boolean[] values) {
+    public ChangeSitesMsg(Map<String, Boolean> sites) {
         this.sites = sites;
-        this.values = values;
     }
 
-    public String[] getSites() {
+    public Map<String, Boolean> getSites() {
         return sites;
-    }
-
-    public boolean[] getValues() {
-        return values;
     }
 
 }

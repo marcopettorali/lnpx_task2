@@ -22,6 +22,19 @@ public class User {
     public String password;
     public boolean adminStatus; //true=admin ; false=simple user
 
+    public User() {
+    }
+    
+    public User(String userID, String firstName, String lastName, Date dateOfBirth, String email, String password, boolean adminStatus) {
+        this.userID = userID;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dateOfBirth = dateOfBirth;
+        this.email = email;
+        this.password = password;
+        this.adminStatus = adminStatus;
+    }
+
     public Document toJSON() {
         Document docUser = new Document();
         docUser.append("userID", this.userID);
@@ -44,5 +57,7 @@ public class User {
         this.password = d.getString("password");
         this.adminStatus=d.getBoolean("adminStatus");
     }
+    
+    
 
 }

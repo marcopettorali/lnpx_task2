@@ -2,11 +2,12 @@ package lnpx;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import lnpx.messages.*;
 
 public class ServerWorker extends Thread {
 
-    private String username;
+    private User user;
     private final Socket socket;
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
@@ -17,19 +18,23 @@ public class ServerWorker extends Thread {
         socket = sock;
     }
 
-    public String getUsername() {
-        return username;
+    public User getUser() {
+        return user;
     }
 
     public Socket getSocket() {
         return socket;
     }
-    
-     private void signIn() {
+
+    private void signIn() {
         try {
             SignInMsg msg = (SignInMsg) ois.readObject();
-            //[...] insert code here
-            //boolean insertUser(User)
+            User u = new User(msg.username, msg.firstName, msg.lastName, msg.dateOfBirth, msg.email, msg.password, msg.adminStatus);
+            boolean ret = MongoDBManager.insertUser(u);
+            int code = ret ? 0 : -1;
+
+            SignInResponseMsg responseMsg = new SignInResponseMsg(code);
+            send("SIGN_IN_R", responseMsg);
 
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
@@ -39,8 +44,19 @@ public class ServerWorker extends Thread {
     private void login() {
         try {
             LoginMsg msg = (LoginMsg) ois.readObject();
-            //[...] insert code here
-            //(User|null) userAuthentication(userId, password)
+
+            User u = MongoDBManager.userAuthentication(msg.getUsername(), msg.getPassword());
+            if (u == null) {
+                send("LOGIN_R", new LoginResponseMsg(-1));
+                return;
+            }
+
+            user = u;
+            if (!u.adminStatus) {
+                send("LOGIN_R", new LoginResponseMsg(0));
+            } else {
+                send("LOGIN_R", new LoginResponseMsg(1));
+            }
 
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
@@ -48,21 +64,94 @@ public class ServerWorker extends Thread {
     }
 
     private void trend() {
-        //[...] insert code here
-        //Map<String, double> calculateTrendingKeyWord()
+        send("TREND_R", new TrendResponseMsg(ServerMain.getTrendingKeyWords()));
     }
 
     private void recommended() {
-        //[...] insert code here
-        //List<Article> suggestedArticles(User)
+        List<Article> recommendedArticles = MongoDBManager.suggestedArticles(user);
+        send("RECOMMENDED_R", new ArticlesResponseMsg(recommendedArticles));
     }
 
-    private void search() {
+    private void find() {
         try {
-            SearchMsg msg = (SearchMsg) ois.readObject();
-            //[...] insert code here
-            //insertSearch(Search)
-            //List<Article> findArticles(Filters)
+            FindMsg msg = (FindMsg) ois.readObject();
+
+            String keyword = null;
+            String topic = null;
+            String author = null;
+            String newspaper = null;
+            String country = null;
+            String region = null;
+            String city = null;
+
+            Map<String, String> filtersMap = msg.getFilters();
+
+            if (filtersMap.containsKey(topic)) {
+                topic = filtersMap.get("topic");
+            }
+            if (filtersMap.containsKey(author)) {
+                author = filtersMap.get("author");
+            }
+            if (filtersMap.containsKey(newspaper)) {
+                newspaper = filtersMap.get("newspaper");
+            }
+            if (filtersMap.containsKey(country)) {
+                country = filtersMap.get("country");
+            }
+            if (filtersMap.containsKey(region)) {
+                region = filtersMap.get("region");
+            }
+            if (filtersMap.containsKey(city)) {
+                city = filtersMap.get("city");
+            }
+
+            Filters filters = new Filters(keyword, topic, author, newspaper, country, region, city);
+            send("SEARCH_R", new ArticlesResponseMsg(MongoDBManager.findArticles(filters)));
+
+        } catch (IOException | ClassNotFoundException ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    private void view() {
+        try {
+            ViewMsg msg = (ViewMsg) ois.readObject();
+
+            String keyword = null;
+            String topic = null;
+            String author = null;
+            String newspaper = null;
+            String country = null;
+            String region = null;
+            String city = null;
+
+            Map<String, String> filtersMap = msg.getFilters();
+
+            if (filtersMap.containsKey(topic)) {
+                topic = filtersMap.get("topic");
+            }
+            if (filtersMap.containsKey(author)) {
+                author = filtersMap.get("author");
+            }
+            if (filtersMap.containsKey(newspaper)) {
+                newspaper = filtersMap.get("newspaper");
+            }
+            if (filtersMap.containsKey(country)) {
+                country = filtersMap.get("country");
+            }
+            if (filtersMap.containsKey(region)) {
+                region = filtersMap.get("region");
+            }
+            if (filtersMap.containsKey(city)) {
+                city = filtersMap.get("city");
+            }
+
+            Filters filters = new Filters(keyword, topic, author, newspaper, country, region, city);
+            //get current time
+            Date timestamp = new Date();
+
+            MongoDBManager.insertView(new View(user.userID, msg.getLinkArticle(), timestamp, filters));
+            send("ACK", new ACKMsg(""));
 
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
@@ -70,15 +159,15 @@ public class ServerWorker extends Thread {
     }
 
     private void clients() {
-       //[...] insert code here
-       //TODO!!!!
+        //[...] insert code here
+        //TODO!!!!
     }
 
     private void changePeriod() {
         try {
             ChangePeriodMsg msg = (ChangePeriodMsg) ois.readObject();
-            //[...] insert code here
-            //TODO!!!
+            ServerMain.setScrapingPeriod(msg.getPeriod());
+            send("ACK", new ACKMsg(""));
 
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
@@ -86,13 +175,15 @@ public class ServerWorker extends Thread {
     }
 
     private void scrapeNow() {
-        //[...] insert code here
+        ServerMain.scrapeNow();
+        send("ACK", new ACKMsg(""));
     }
 
     private void changeSites() {
         try {
             ChangeSitesMsg msg = (ChangeSitesMsg) ois.readObject();
             //[...] insert code here
+            //TODO!!!
 
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
@@ -137,8 +228,11 @@ public class ServerWorker extends Thread {
                     case "RECOMMENDED":
                         recommended();
                         break;
-                    case "SEARCH":
-                        search();
+                    case "FIND":
+                        find();
+                        break;
+                    case "VIEW":
+                        view();
                         break;
                     case "CLIENTS":
                         clients();
