@@ -140,9 +140,9 @@ public class MongoDBManager {
      *
      * @return List<String> This contains the 10 tranding words of the moment
      */
-    public static Map<String,Double> calculateTrendingKeyWords() {
-        Map<String,Double> keyWordValue=new HashMap();
-        double valueOfKeyword;
+    public static Map<String,Integer> calculateTrendingKeyWords() {
+        Map<String,Integer> keyWordValue=new HashMap();
+        Integer valueOfKeyword;
         SimpleDateFormat sdf = new SimpleDateFormat(); 
         sdf.applyPattern("yyyy-MM-dd'T'HH:mm:ss.SSS\'Z\'");
                 
@@ -158,14 +158,14 @@ public class MongoDBManager {
                 new Document("$unwind", "$Keywords"),
                 new Document("$group", new Document("_id", "$Keywords.keyword")
                         .append("Occur", new Document("$sum", "$Keywords.Occ"))
-                        .append("NumberOfArticles",new Document("$sum", 1.0))),
-                new Document("$sort", new Document("NumberOfArticles", -1))));
+                        .append("NumberOfArticles",new Document("$sum", 1))),
+                new Document("$sort", new Document("NumberOfArticles", -1).append("Occur", -1))));
        
         for (Document dbObject : results) {
             //Formula NumeroArticoli^2*Occorenze
-            double nOcc=dbObject.getDouble("Occur");
-            double nArticle= dbObject.getDouble("NumberOfArticles");
-            valueOfKeyword= nOcc*nArticle*nArticle;
+            Integer nOcc=dbObject.getInteger("Occur");
+            Integer nArticle= dbObject.getInteger("NumberOfArticles");
+            valueOfKeyword=nOcc*nArticle*nArticle;
             keyWordValue.put((String) dbObject.get("_id"), valueOfKeyword);
            // System.out.println((String) dbObject.get("_id"));
            // trendingKeywords.add((String) dbObject.get("_id"));
@@ -202,7 +202,7 @@ public class MongoDBManager {
         BasicDBObject queryArticle = new BasicDBObject();
         queryArticle.append("Link", a.Link);
 
-        collection.updateOne(queryArticle, newUpdate);
+        collection.updateOne(queryArticle, setQuery);
     }
 
     public static void createIndexes() {
