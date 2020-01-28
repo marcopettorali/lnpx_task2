@@ -18,7 +18,7 @@ public class Article {
 
     public String Title;            //mandatory
     public String Link;             //mandatory
-    public String Topic;            //mandatory
+    public List<String> Topic;            //mandatory
     public List<String> Authors;  //mandatory One or More
     public String Newspaper;        //mandatory
     public String Text;             //mandatory 
@@ -49,7 +49,7 @@ public class Article {
     public void fromJSON(Document d) {
         this.Title = (String) d.get("Title");
         this.Link = (String) d.get("Link");
-        this.Topic = (String) d.get("Topic");
+        this.Topic = (List<String>) d.get("Topic");
         this.Authors = (List<String>) d.get("Authors");
         this.Newspaper = (String) d.get("Newspaper");
         this.Text = (String) d.get("Text");

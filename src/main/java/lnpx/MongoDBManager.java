@@ -12,7 +12,7 @@ Ricordiamo di chiamare la mongoDB close
 public class MongoDBManager {
 
     private static final MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-    private static final MongoDatabase database = mongoClient.getDatabase("TryDb");
+    private static final MongoDatabase database = mongoClient.getDatabase("Article");
 
     public static void insertArticle(Article a) {
         MongoCollection<Document> collection = database.getCollection("Article");
