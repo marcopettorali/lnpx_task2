@@ -34,9 +34,9 @@ public class MongoDBManager {
         List<BasicDBObject> obj = new ArrayList<>();
         obj.add(new BasicDBObject("Keywords.keyword",F.keyWord));
         obj.add(new BasicDBObject("Topic", F.topic));
-        if (!F.author.isEmpty()) {
-            obj.add(new BasicDBObject("Authors", new BasicDBObject("$all", F.author)));  // Dubbio
-        }
+//        if (!F.author.isEmpty()) {
+  //          obj.add(new BasicDBObject("Authors", new BasicDBObject("$all", F.author)));  // Dubbio
+    //    }
         obj.add(new BasicDBObject("Newspaper", F.newspaper));
         obj.add(new BasicDBObject("Country", F.country));
         obj.add(new BasicDBObject("Region", F.region));
@@ -223,21 +223,40 @@ public class MongoDBManager {
 
     }
 
-    public static Map<String, Integer> retrieveUsersInformation()
+    public static Map<User, Integer> retrieveUsersInformation()
     {
-        Map<String,Integer> usersInfo = new HashMap();
+        User actualUser=new User();
+        Map<User,Integer> usersInfo = new HashMap();
         MongoCollection<Document> collection = database.getCollection("Search");
         ArrayList<String> usersAggregation = new ArrayList<>();
         AggregateIterable<Document> results;
         results = collection.aggregate(Arrays.asList(
                 new Document("$group", new Document("_id", "$userID").append("value", new Document("$sum", 1))),
                 new Document("$sort", new Document("value", -1))));
-        
+        collection = database.getCollection("Users");
+        FindIterable<Document> allUsers=collection.find();
+        for(Document dbUser: allUsers)
+        {
+            actualUser.fromJSON(dbUser);
+            usersInfo.put(actualUser, 0);
+        }
         for (Document dbObject : results) {
-            usersInfo.put((String) dbObject.get("_id"), (Integer) dbObject.get("value"));
+            System.out.println("-- - -- --- -- - - - - - - - - - --");
+            System.out.println((String) dbObject.get("_id"));
+            FindIterable<Document> d = collection.find(new Document("userID",(String) dbObject.get("_id")));
+            actualUser.fromJSON(d.first());
+            usersInfo.put(actualUser, (Integer) dbObject.get("value"));
         }
         
         return usersInfo;
+    }
+    
+    public static void deleteUser(User u)
+    {
+        MongoCollection<Document> collection = database.getCollection("Search");
+        collection.deleteMany(new Document("userID",u.userID));
+        collection=database.getCollection("Users");
+        collection.deleteMany(new Document("userID",u.userID));
     }
     
      public static ArrayList<Article> findArticlesNoKeywords() {
