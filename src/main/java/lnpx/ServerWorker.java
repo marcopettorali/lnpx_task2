@@ -190,7 +190,7 @@ public class ServerWorker extends Thread {
         }
     }
 
-    public void send(String cmd, Serializable msg) {//06
+    private void send(String cmd, Serializable msg) {//06
         synchronized (socket) {
             try {
                 dos.writeUTF(cmd);
