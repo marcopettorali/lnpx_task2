@@ -1,6 +1,6 @@
 package lnpx;
 
-public class AsynchronousWorker extends Thread {
+public class ServerAsynchronousWorker extends Thread {
 
     private static Boolean working;
 
@@ -30,7 +30,7 @@ public class AsynchronousWorker extends Thread {
 
     public void round() {
         System.out.println("Scraping now...");
-        if(isWorking()){
+        if (isWorking()) {
             return;
         }
         setWorking(true);

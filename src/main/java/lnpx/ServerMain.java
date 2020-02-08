@@ -22,7 +22,7 @@ public class ServerMain {
         listenerThread.run();
 
         //Start scraping activity
-        AsynchronousWorker worker = new AsynchronousWorker();
+        ServerAsynchronousWorker worker = new ServerAsynchronousWorker();
         worker.setDaemon(true);
         worker.run();
 
@@ -53,11 +53,11 @@ public class ServerMain {
     }
 
     public static int scrapeNow() {
-        if (AsynchronousWorker.isWorking()) {
+        if (ServerAsynchronousWorker.isWorking()) {
             return 1;
         }
 
-        AsynchronousWorker worker = new AsynchronousWorker();
+        ServerAsynchronousWorker worker = new ServerAsynchronousWorker();
         worker.round();
         return 0;
     }

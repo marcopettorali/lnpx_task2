@@ -621,10 +621,10 @@ public class Scraper {
 
     }
 
-    private static void writeToFile(List<lastTweetId> ltiList) {
+    private static void writeToFile(List<LastTweetId> ltiList) {
         try (FileOutputStream fos = new FileOutputStream("lastTweetId");
                 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));) {
-            for (lastTweetId lti : ltiList) {
+            for (LastTweetId lti : ltiList) {
                 bw.write(lti.toString());
                 bw.newLine();
             }
@@ -636,14 +636,14 @@ public class Scraper {
         }
     }
 
-    private static List<lastTweetId> readFromFile() {
-        List<lastTweetId> result = new ArrayList<>();
+    private static List<LastTweetId> readFromFile() {
+        List<LastTweetId> result = new ArrayList<>();
         try (FileInputStream fis = new FileInputStream("lastTweetId");
                 BufferedReader br = new BufferedReader(new InputStreamReader(fis));) {
             String line = br.readLine();
             while (line != null) {
                 String[] splitted = line.split(":");
-                result.add(new lastTweetId(splitted[0], Long.parseLong(splitted[1])));
+                result.add(new LastTweetId(splitted[0], Long.parseLong(splitted[1])));
                 line = br.readLine();
             }
         } catch (FileNotFoundException ex) {
@@ -692,8 +692,8 @@ public class Scraper {
         return twitter;
     }
 
-    private static lastTweetId findLastTweetId(List<lastTweetId> ltilist, String user) {
-        for (lastTweetId lti : ltilist) {
+    private static LastTweetId findLastTweetId(List<LastTweetId> ltilist, String user) {
+        for (LastTweetId lti : ltilist) {
             if (lti.getUser().equals(user)) {
                 return lti;
             }
@@ -713,12 +713,12 @@ public class Scraper {
     private static List<Status> getStatus(Twitter twitter, String user) {
         Paging paging = new Paging(1, 200);
         List<Status> status = null;
-        List<lastTweetId> ltilist = readFromFile();
+        List<LastTweetId> ltilist = readFromFile();
         Long lastId;
-        lastTweetId lti = findLastTweetId(ltilist, user);
+        LastTweetId lti = findLastTweetId(ltilist, user);
         //Account mai scrapato prima
         if (lti == null) {
-            ltilist.add(new lastTweetId(user, 1L));
+            ltilist.add(new LastTweetId(user, 1L));
             lastId = 1L;
         } else {
             lastId = findLastTweetId(ltilist, user).getId();
@@ -772,11 +772,11 @@ public class Scraper {
 
         PropertyConfigurator.configure("log4j.properties");
         Twitter twitter = getTwitterFactory();
-        List<statusList> statuslist = new ArrayList<>();
+        List<StatusList> statuslist = new ArrayList<>();
         for (String user : accountToScrape) {
             List<Status> status = getStatus(twitter, user);
             if (!status.isEmpty()) {
-                statuslist.add(new statusList(user, status));
+                statuslist.add(new StatusList(user, status));
             }
         }
         int[] indexes = new int[statuslist.size()];
