@@ -1,6 +1,7 @@
 package lnpx;
 
 class lastTweetId {
+
     private String user;
     private Long Id;
 
@@ -27,7 +28,7 @@ class lastTweetId {
 
     @Override
     public String toString() {
-        return user+":"+Id;
+        return user + ":" + Id;
     }
-    
+
 }

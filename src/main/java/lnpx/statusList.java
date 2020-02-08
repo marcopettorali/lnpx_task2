@@ -1,10 +1,10 @@
 package lnpx;
 
-
 import java.util.List;
 import twitter4j.Status;
 
 class statusList {
+
     private String user;
     private List<Status> status;
 
@@ -20,5 +20,5 @@ class statusList {
     public List<Status> getStatus() {
         return status;
     }
-    
+
 }

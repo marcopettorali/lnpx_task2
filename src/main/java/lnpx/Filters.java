@@ -1,18 +1,7 @@
 package lnpx;
 
-import java.util.Date;
-import java.util.List;
 import org.bson.Document;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- *
- * @author Riccardo
- */
 public class Filters {
 
     public String keyWord;
@@ -22,10 +11,11 @@ public class Filters {
     public String country;
     public String region;
     public String city;
-    
-    public Filters(){}
 
-    public Filters(String Keyword, String Topic,String Author, String Newspaper, String Country, String Region, String City) {
+    public Filters() {
+    }
+
+    public Filters(String Keyword, String Topic, String Author, String Newspaper, String Country, String Region, String City) {
         this.keyWord = Keyword;
         this.topic = Topic;
         this.author = Author;
@@ -37,8 +27,8 @@ public class Filters {
 
     public Document toJSON() {
         Document docFilters = new Document();
-        if (this.keyWord!=null){
-              docFilters.append("Keyword", this.keyWord);
+        if (this.keyWord != null) {
+            docFilters.append("Keyword", this.keyWord);
         }
         if (this.topic != null) {
             docFilters.append("Topic", this.topic);

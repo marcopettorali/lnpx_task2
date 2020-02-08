@@ -30,10 +30,12 @@ public class AsynchronousWorker extends Thread {
 
     public void round() {
         System.out.println("Scraping now...");
+        if(isWorking()){
+            return;
+        }
         setWorking(true);
-
-        //insert code here...
-        
+        Scraper.scrape();
+        ServerMain.articleTextAnalysis();
         ServerMain.setTrendingKeyWords(MongoDBManager.calculateTrendingKeyWords());
         setWorking(false);
         System.out.println("Scraping round ended");

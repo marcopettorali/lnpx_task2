@@ -1,13 +1,14 @@
 package lnpx;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class ServerMain {
 
     private static Map<String, Integer> trendingKeyWords;
     private static Double scrapingPeriod;
 
-    private static void main(String[] args) {
+    public static void main(String[] args) {
 
         //create indexes
         MongoDBManager.createIndexes();
@@ -59,5 +60,18 @@ public class ServerMain {
         AsynchronousWorker worker = new AsynchronousWorker();
         worker.round();
         return 0;
+    }
+
+    public static void articleTextAnalysis() {
+        Filters fi = new Filters();
+        ArrayList<Article> art = MongoDBManager.findArticles(fi);
+        for (int i = 0; i < art.size(); i++) {
+            try {
+                MongoDBManager.insertKeywordAnalysis(art.get(i), TextAnalyzer.keywordAnalysis(art.get(i).Text));
+            } catch (Exception ex) {
+                java.util.logging.Logger.getLogger(Scraper.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        MongoDBManager.calculateTrendingKeyWords();
     }
 }

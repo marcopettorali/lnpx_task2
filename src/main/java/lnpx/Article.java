@@ -5,15 +5,6 @@ import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- *
- * @author Riccardo
- */
 public class Article {
 
     public String Title;            //mandatory
@@ -26,8 +17,8 @@ public class Article {
     public String Country;
     public String Region;
     public String City;
-    public  Map<String, Integer> keyWordAnalysis; //pensa a come trasformare la keyword doc in un Map
-    
+    public Map<String, Integer> keyWordAnalysis; //pensa a come trasformare la keyword doc in un Map
+
     public Document toJSON() {
         Document docArticle = new Document("Title", this.Title).append("Link", this.Link).append("Topic", this.Topic).append("Newspaper", this.Newspaper).append("Text", this.Text).append("date", this.Date);
         if (this.Authors != null) {
