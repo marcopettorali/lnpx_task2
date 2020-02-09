@@ -12,7 +12,7 @@ Ricordiamo di chiamare la mongoDB close
 public class MongoDBManager {
 
     private static final MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-    private static final MongoDatabase database = mongoClient.getDatabase("TryDb");
+    private static final MongoDatabase database = mongoClient.getDatabase("Article");
 
     /* ********************* USER Management ******************************** */
     public static boolean insertUser(User u) {
@@ -102,24 +102,29 @@ public class MongoDBManager {
         /* *** QUERY *** */
         BasicDBObject andFindQuery = new BasicDBObject();
         List<BasicDBObject> obj = new ArrayList<>();
-        obj.add(new BasicDBObject("Keywords.keyword", F.keyWord));
-        obj.add(new BasicDBObject("Topic", F.topic));
-        //if (!F.author.isEmpty()) {
-        //   obj.add(new BasicDBObject("Authors", new BasicDBObject("$all", F.author)));  // Dubbio
-        // }
-        obj.add(new BasicDBObject("Newspaper", F.newspaper));
-        obj.add(new BasicDBObject("Country", F.country));
-        obj.add(new BasicDBObject("Region", F.region));
-        obj.add(new BasicDBObject("City", F.city));
+        if(F.keyWord!=null)
+            obj.add(new BasicDBObject("Keywords.keyword", F.keyWord));
+        if(F.topic!=null)
+            obj.add(new BasicDBObject("Topic", F.topic));
+        if(F.author!=null)
+            obj.add(new BasicDBObject("Authors", F.author)); 
+        if(F.newspaper!=null)
+            obj.add(new BasicDBObject("Newspaper", F.newspaper));
+       /* if(F.country!=null)
+            obj.add(new BasicDBObject("Country", F.country));
+        if(F.region!=null)
+            obj.add(new BasicDBObject("Region", F.region));*/
+        if(F.city!=null)
+            obj.add(new BasicDBObject("City", F.city));
         andFindQuery.put("$and", obj);
 
-        System.out.println(andFindQuery.toString());
+        //System.out.println(andFindQuery.toString());
 
         MongoCursor<Document> cursor = collection.find(andFindQuery).iterator();
         try {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
-                System.out.println(d.toJson());
+                //System.out.println(d.toJson());
                 Article A = new Article();
                 A.fromJSON(d);
                 resultArticles.add(A);
@@ -131,37 +136,60 @@ public class MongoDBManager {
 
     }
 
-    public static Map<String, Integer> calculateTrendingKeyWords() {
-        Map<String, Integer> keyWordValue = new HashMap();
+    public static LinkedHashMap<String, Long> calculateTrendingKeyWords() {
+        Long l=new Long(0);
+        Map<String, Long> keyWordValue = new HashMap();
         Integer valueOfKeyword;
         SimpleDateFormat sdf = new SimpleDateFormat();
         sdf.applyPattern("yyyy-MM-dd'T'HH:mm:ss.SSS\'Z\'");
 
         Date actualDate = new Date();
 
-        Date queryDate = subtractDays(actualDate, 7);
+        Date queryDate = subtractDays(actualDate, 100);
 
         MongoCollection<Document> collection = database.getCollection("Article");
         // ArrayList<String> trendingKeywords = new ArrayList<>();
         AggregateIterable<Document> results;
+        ArrayList<String> indexes=new ArrayList<>();
+        indexes.add("$Occur");
+        indexes.add("$NumberOfArticles");
+        indexes.add("$NumberOfArticles");
+        
         results = collection.aggregate(Arrays.asList(
                 new Document("$match", new Document("date", new Document("$gt", queryDate))),
                 new Document("$unwind", "$Keywords"),
                 new Document("$group", new Document("_id", "$Keywords.keyword")
                         .append("Occur", new Document("$sum", "$Keywords.Occ"))
                         .append("NumberOfArticles", new Document("$sum", 1))),
-                new Document("$sort", new Document("NumberOfArticles", -1).append("Occur", -1))));
+                new Document("$project",new Document("_id",1).append("Value", new Document("$multiply",indexes) )),
+                new Document("$sort", new Document("Value", -1)),
+                new Document("$limit",500)));
 
         for (Document dbObject : results) {
             //Formula NumeroArticoli^2*Occorenze
-            Integer nOcc = dbObject.getInteger("Occur");
-            Integer nArticle = dbObject.getInteger("NumberOfArticles");
-            valueOfKeyword = nOcc * nArticle * nArticle;
-            keyWordValue.put((String) dbObject.get("_id"), valueOfKeyword);
+            //Integer nOcc = dbObject.getInteger("Occur");
+           // Integer nArticle = dbObject.getInteger("NumberOfArticles");
+           // valueOfKeyword = nOcc * nArticle * nArticle;
+           // keyWordValue.put((String) dbObject.get("_id"), valueOfKeyword);
+            if(dbObject.get("Value").getClass()!=l.getClass())
+                l=Long.valueOf((Integer) dbObject.get("Value"));
+            else
+                l=(Long) dbObject.get("Value");
+           // Long l=new Long((long) dbObject.get("Value"));
+            keyWordValue.put((String) dbObject.get("_id"), l);
             // System.out.println((String) dbObject.get("_id"));
             // trendingKeywords.add((String) dbObject.get("_id"));
         }
-        return keyWordValue;
+        LinkedHashMap<String, Long> reverseSortedMap = new LinkedHashMap<>();
+ 
+        //Use Comparator.reverseOrder() for reverse ordering
+        keyWordValue.entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())) 
+            .forEachOrdered(x -> reverseSortedMap.put(x.getKey(), x.getValue()));
+        System.out.println(reverseSortedMap);
+        
+        return reverseSortedMap;
     }
 
     public static void insertKeywordAnalysis(Article a, Map<String, Integer> keyWordAnalysis) {
