@@ -747,7 +747,7 @@ public class Scraper {
         return status;
     }
 
-    public void setAccountToScrape(List<String> account) {
+    public static void setAccountToScrape(List<String> account) {
         List<String> result = new ArrayList<>();
         for (String s : account) {
             switch (s) {

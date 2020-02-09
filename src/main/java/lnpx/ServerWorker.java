@@ -159,8 +159,11 @@ public class ServerWorker extends Thread {
     }
 
     private void clients() {
-        //[...] insert code here
-        //TODO!!!!
+
+        List<User> users = new ArrayList<>();
+        users.addAll(MongoDBManager.retrieveUsersInformation().keySet());
+        send("CLIENTS_R", new ClientsResponseMsg(users));
+
     }
 
     private void changePeriod() {
@@ -182,9 +185,14 @@ public class ServerWorker extends Thread {
     private void changeSites() {
         try {
             ChangeSitesMsg msg = (ChangeSitesMsg) ois.readObject();
-            //[...] insert code here
-            //TODO!!!
-
+            List<String> accounts = new ArrayList<>();
+            for(String key : msg.getSites().keySet()){
+                if(msg.getSites().get(key)){
+                    accounts.add(key);
+                }
+            }
+            Scraper.setAccountToScrape(accounts);
+            send("ACK", new ACKMsg(""));
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
         }
