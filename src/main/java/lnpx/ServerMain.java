@@ -56,9 +56,7 @@ public class ServerMain {
         if (ServerAsynchronousWorker.isWorking()) {
             return 1;
         }
-
-        ServerAsynchronousWorker worker = new ServerAsynchronousWorker();
-        worker.round();
+        ServerAsynchronousWorker.round();
         return 0;
     }
 

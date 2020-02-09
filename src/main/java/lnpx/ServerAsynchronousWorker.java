@@ -28,7 +28,7 @@ public class ServerAsynchronousWorker extends Thread {
         }
     }
 
-    public void round() {
+    public static void round() {
         System.out.println("Scraping now...");
         if (isWorking()) {
             return;
