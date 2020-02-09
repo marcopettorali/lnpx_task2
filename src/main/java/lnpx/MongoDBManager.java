@@ -237,6 +237,10 @@ public class MongoDBManager {
 
     }
 
+    public static void deleteKeywordAnalysis(){
+        MongoCollection<Document> collection = database.getCollection("Article");
+        collection.updateMany(new Document(),new Document("$unset",new Document("Keywords",1)));
+    }
     /* ********************* END ARTICLE Management ************************* */
  /* *********************** VIEW Management ****************************** */
     public static void insertView(View s) {
