@@ -44,7 +44,7 @@ public class ServerWorker extends Thread {
     private void login() {
         try {
             LoginMsg msg = (LoginMsg) ois.readObject();
-
+            
             User u = MongoDBManager.userAuthentication(msg.getUsername(), msg.getPassword());
             if (u == null) {
                 send("LOGIN_R", new LoginResponseMsg(-1));
@@ -64,7 +64,7 @@ public class ServerWorker extends Thread {
     }
 
     private void trend() {
-        send("TREND_R", new TrendResponseMsg(ServerMain.getTrendingKeyWords()));
+       send("TREND_R", new TrendResponseMsg(ServerMain.getTrendingKeyWords()));
     }
 
     private void recommended() {
@@ -85,7 +85,9 @@ public class ServerWorker extends Thread {
             String city = null;
 
             Map<String, String> filtersMap = msg.getFilters();
-
+            
+            keyword = msg.getKeyword();
+            
             if (filtersMap.containsKey(topic)) {
                 topic = filtersMap.get("topic");
             }
@@ -107,7 +109,7 @@ public class ServerWorker extends Thread {
 
             Filters filters = new Filters(keyword, topic, author, newspaper, country, region, city);
             send("SEARCH_R", new ArticlesResponseMsg(MongoDBManager.findArticles(filters)));
-
+                     
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
         }
