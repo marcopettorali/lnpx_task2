@@ -177,7 +177,7 @@ public class MongoDBManager {
             obj.add(new BasicDBObject("City", F.city));
      
         Date actualDate = new Date();
-        Date queryDate = subtractDays(actualDate, 15);
+        Date queryDate = subtractDays(actualDate, 20);
         
         obj.add(new BasicDBObject("date", BasicDBObjectBuilder.start( "$gte",queryDate).get()));
  
@@ -328,7 +328,7 @@ public class MongoDBManager {
         //forse le sue match si possono fare con un append!
         results = collection.aggregate(Arrays.asList(
                 new Document("$match", new Document("userID", u.userID)),
-                //new Document("$match", new Document("date", new Document("$gt", queryDate))),
+                new Document("$match", new Document("dateRead", BasicDBObjectBuilder.start( "$gte",queryDate).get())),
                 new Document("$group", new Document("_id", "$filters").append("value", new Document("$sum", 1))),
                 new Document("$sort", new Document("value", -1)),
                 new Document("$limit", 3)));
