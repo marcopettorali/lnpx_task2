@@ -69,6 +69,7 @@ public class ServerWorker extends Thread {
 
     private void recommended() {
         List<Article> recommendedArticles = MongoDBManager.suggestedArticles(user);
+        System.out.println(recommendedArticles);
         send("RECOMMENDED_R", new ArticlesResponseMsg(recommendedArticles));
     }
 
@@ -87,23 +88,17 @@ public class ServerWorker extends Thread {
             Map<String, String> filtersMap = msg.getFilters();
 
             keyword = msg.getKeyword();
-
-            topic = filtersMap.get("Topic");
-
+            if(filtersMap.get("Topic") == null)
+                topic = "";
+            else
+                topic = filtersMap.get("Topic");
             author = filtersMap.get("Author");
-
             newspaper = filtersMap.get("Newspaper");
-
             country = filtersMap.get("Country");
-
             region = filtersMap.get("Region");
-
             city = filtersMap.get("City");
-
             Filters filters = new Filters(keyword, topic, author, newspaper, country, region, city);
-            
             send("SEARCH_R", new ArticlesResponseMsg(MongoDBManager.findArticles(filters)));
-
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
         }
@@ -123,23 +118,31 @@ public class ServerWorker extends Thread {
 
             Map<String, String> filtersMap = msg.getFilters();
             keyword = filtersMap.get("Keyword");
-
             topic = filtersMap.get("Topic");
-
             author = filtersMap.get("Author");
-
             newspaper = filtersMap.get("Newspaper");
-
             country = filtersMap.get("Country");
-
             region = filtersMap.get("Region");
-
             city = filtersMap.get("City");
-
+            
+            if(author.equals("")){
+                author = null;
+            }
+            if(newspaper.equals("")){
+                newspaper = null;
+            }
+            if(country.equals("")){
+                country = null;
+            }
+            if(region.equals("")){
+                region = null;
+            }
+            if(city.equals("")){
+                city = null;
+            }
+            
             Filters filters = new Filters(keyword, topic, author, newspaper, country, region, city);
-            //get current time
             Date timestamp = new Date();
-
             MongoDBManager.insertView(new View(user.userID, msg.getLinkArticle(), timestamp, filters));
             send("ACK", new ACKMsg(""));
 

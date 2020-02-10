@@ -34,21 +34,27 @@ public class Filters {
 
     public Document toJSON() {
         Document docFilters = new Document();
-
-        docFilters.append("Keyword", this.keyWord);
-
-        docFilters.append("Topic", this.topic);
-
-        docFilters.append("Authors", this.author);
-
-        docFilters.append("Newspaper", this.newspaper);
-
-        docFilters.append("Country", this.country);
-
-        docFilters.append("Region", this.region);
-
-        docFilters.append("City", this.city);
-
+        if (this.keyWord!=null){
+              docFilters.append("Keyword", this.keyWord);
+        }
+        if (this.topic != null) {
+            docFilters.append("Topic", this.topic);
+        }
+        if (this.author != null) {
+            docFilters.append("Authors", this.author);
+        }
+        if (this.newspaper != null) {
+            docFilters.append("Newspaper", this.newspaper);
+        }
+        if (this.country != null) {
+            docFilters.append("Country", this.country);
+        }
+        if (this.region != null) {
+            docFilters.append("Region", this.region);
+        }
+        if (this.city != null) {
+            docFilters.append("City", this.city);
+        }
         return docFilters;
     }
 

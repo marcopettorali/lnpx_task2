@@ -124,7 +124,7 @@ public class MongoDBManager {
         List<BasicDBObject> obj = new ArrayList<>();
         if(!(F.keyWord == null))
             obj.add(new BasicDBObject("Keywords.keyword", F.keyWord));
-        if(!(F.topic == null))
+        if(!(F.topic.equals("")))
             obj.add(new BasicDBObject("Topic", F.topic));
         if(!(F.author.equals("")))
             obj.add(new BasicDBObject("Authors", F.author)); 
