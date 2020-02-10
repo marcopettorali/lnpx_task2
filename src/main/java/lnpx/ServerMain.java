@@ -5,7 +5,7 @@ import java.util.logging.Level;
 
 public class ServerMain {
 
-    private static Map<String, Integer> trendingKeyWords;
+    private static LinkedHashMap<String, Long> trendingKeyWords;
     private static Double scrapingPeriod;
 
     public static void main(String[] args) {
@@ -28,13 +28,13 @@ public class ServerMain {
 
     }
 
-    public static void setTrendingKeyWords(Map<String, Integer> trendingKeyWords) {
+    public static void setTrendingKeyWords(LinkedHashMap<String, Long> trendingKeyWords) {
         synchronized (trendingKeyWords) {
             ServerMain.trendingKeyWords = trendingKeyWords;
         }
     }
 
-    public static Map<String, Integer> getTrendingKeyWords() {
+    public static LinkedHashMap<String, Long> getTrendingKeyWords() {
         synchronized (trendingKeyWords) {
             return trendingKeyWords;
         }
