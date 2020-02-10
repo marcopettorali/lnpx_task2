@@ -78,6 +78,26 @@ public class MongoDBManager {
         collection = database.getCollection("Users");
         collection.deleteMany(new Document("userID", u.userID));
     }
+    
+    public static void populateUsers()
+    {
+        User u=new User();
+        String[] FName={"Giuseppe","Maria","Giovanni","Anna","Antonio","Giuseppina","Mario","Rosa","Luigi","Angela","Francesco","Giovanna","Angelo","Teresa","Vincenzo","Lucia","Pietro","Carmela","Salvatore","Caterina","Carlo","Francesca","Franco","Anna Maria","Domenico","Antonietta","Bruno","Carla","Paolo","Elena","Michele","Concetta","Giorgio","Rita","Aldo","Margherita","Sergio","Franca","Luciano","Paola"};
+        String[] LName={"Rossi","Russo","Ferrari","Esposito","Bianchi","Romano","Colombo","Ricci","Marino","Greco","Bruno","Gallo","Conti","De Luca","Mancini","Costa","Giordano","Rizzo","Lombardi","Moretti","Barbieri","Fontana","Santoro","Mariani","Rinaldi","Caruso","Ferrara","Galli","Martini","Leone","Longo","Gentile","Martinelli","Vitale","Lombardo","Serra","Coppola","De Santis","D'angelo","Marchetti"};
+       for(int j=0;j<LName.length;j++)
+       {
+        for(int i=0;i<FName.length;i++)
+        {
+            u.userID=FName[i]+LName[j];
+            u.firstName=FName[i];
+            u.lastName=LName[j];
+            u.email=FName[i]+LName[j]+"@gmail.com";
+            u.password=FName[i]+LName[j];
+            u.adminStatus=false;
+            insertUser(u);
+        }
+       }
+    }
 
     /* ******************* END USER Management  ***************************** */
     /**
@@ -319,7 +339,7 @@ public class MongoDBManager {
         collection.createIndex(obj);
         collection = database.getCollection("Users");
         obj = new BasicDBObject();
-        obj.put("UserID", 1);
+        obj.put("userID", 1);
         collection.createIndex(obj);
 
     }
