@@ -1,7 +1,9 @@
 package lnpx;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
@@ -39,6 +41,7 @@ public class Article implements Serializable{
     }
 
     public void fromJSON(Document d) {
+        keyWordAnalysis=new HashMap<>();
         this.Title = (String) d.get("Title");
         this.Link = (String) d.get("Link");
         this.Topic = (List<String>) d.get("Topic");
@@ -49,5 +52,12 @@ public class Article implements Serializable{
         this.Country = (String) d.get("Country");
         this.Region = (String) d.get("Region");
         this.City = (String) d.get("City");
+        if(d.get("Keywords")!=null)
+        {
+            ArrayList<org.bson.Document> keywords=(ArrayList<org.bson.Document>) d.get("Keywords");
+            for (Document k : keywords) {
+                keyWordAnalysis.put((String) k.get("keyword"), (Integer) k.get("Occ"));
+            }
+        }
     }
 }
