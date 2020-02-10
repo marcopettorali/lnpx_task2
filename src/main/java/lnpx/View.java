@@ -21,7 +21,7 @@ public class View {
         Document docSearch = new Document();
         docSearch.append("userID", this.userID);
         docSearch.append("linkArticle", this.linkArticle);
-        docSearch.append("dateRead", java.time.LocalDate.now());
+        docSearch.append("dateRead", dateRead);
         Document Filter = usedFilters.toJSON();
         docSearch.append("filters", Filter);
         return docSearch;
