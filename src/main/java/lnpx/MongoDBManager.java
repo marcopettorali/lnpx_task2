@@ -1,6 +1,7 @@
 package lnpx;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.client.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -15,6 +16,11 @@ public class MongoDBManager {
     private static final MongoDatabase database = mongoClient.getDatabase("Article");
 
     /* ********************* USER Management ******************************** */
+    /**
+     * This function inserts an user if the userID Chosen is free
+     * @param u
+     * @return 
+     */
     public static boolean insertUser(User u) {
         MongoCollection<Document> collection = database.getCollection("Users");
         BasicDBObject idQuery = new BasicDBObject("userID", u.userID);
@@ -26,6 +32,12 @@ public class MongoDBManager {
         return true;
     }
 
+    /**
+     *  Given an userId and Password this function retive the User information
+     * @param userId
+     * @param password
+     * @return User : null if there is no match
+     */
     public static User userAuthentication(String userId, String password) {
         User u = null;
         MongoCollection<Document> collection = database.getCollection("Users");
@@ -46,24 +58,30 @@ public class MongoDBManager {
         return u;
     }
 
+    /**
+     * This function retive for each user the number of search done, 
+     * this function is used by the admins to have an overview of the most active 
+     * users
+     * @return  Map<User, Integer
+     */
     public static Map<User, Integer> retrieveUsersInformation() {
         User actualUser = new User();
         Map<User, Integer> usersInfo = new HashMap();
+        
         MongoCollection<Document> collection = database.getCollection("Search");
-        ArrayList<String> usersAggregation = new ArrayList<>();
         AggregateIterable<Document> results;
         results = collection.aggregate(Arrays.asList(
                 new Document("$group", new Document("_id", "$userID").append("value", new Document("$sum", 1))),
                 new Document("$sort", new Document("value", -1))));
+        
         collection = database.getCollection("Users");
         FindIterable<Document> allUsers = collection.find();
         for (Document dbUser : allUsers) {
             actualUser.fromJSON(dbUser);
             usersInfo.put(actualUser, 0);
         }
+        
         for (Document dbObject : results) {
-            System.out.println("-- - -- --- -- - - - - - - - - - --");
-            System.out.println((String) dbObject.get("_id"));
             FindIterable<Document> d = collection.find(new Document("userID", (String) dbObject.get("_id")));
             actualUser.fromJSON(d.first());
             usersInfo.put(actualUser, (Integer) dbObject.get("value"));
@@ -72,13 +90,19 @@ public class MongoDBManager {
         return usersInfo;
     }
 
+    /**
+     * This function delete an user and all his history 
+     * @param u 
+     */
     public static void deleteUser(User u) {
         MongoCollection<Document> collection = database.getCollection("Search");
         collection.deleteMany(new Document("userID", u.userID));
         collection = database.getCollection("Users");
         collection.deleteMany(new Document("userID", u.userID));
     }
-    
+    /**
+     * This function is used to fill the User collection for indexes statistics
+     */
     public static void populateUsers()
     {
         User u=new User();
@@ -100,8 +124,12 @@ public class MongoDBManager {
     }
 
     /* ******************* END USER Management  ***************************** */
+    
+    
+    /********************* ARTICLE Management ******************************* */
     /**
-     * ******************* ARTICLE Management *******************************
+     * This function s used to insert and Article in the Database
+     * @param a 
      */
     public static void insertArticle(Article a) {
         MongoCollection<Document> collection = database.getCollection("Article");
@@ -109,42 +137,56 @@ public class MongoDBManager {
         collection.insertOne(docArticle);
     }
 
-    public static void printArticles() {
+    /*public static void printArticles() {
         MongoCollection<Document> collection = database.getCollection("Article");
         FindIterable<Document> d = collection.find();
         System.out.println(collection.countDocuments());
-    }
+    }*/
 
-    //Da aggiungere vincolo della Data
+    /**
+     * This function retrives the articles that match the chosen Filters
+     * @param F
+     * @return 
+     */
     public static ArrayList<Article> findArticles(Filters F) {
         MongoCollection<Document> collection = database.getCollection("Article");
+        
+        /*SimpleDateFormat sdf = new SimpleDateFormat();
+        sdf.applyPattern("yyyy-MM-dd'T'HH:mm:ss.SSS\'Z\'");*/
+        
         ArrayList<Article> resultArticles = new ArrayList<>();
         /* *** QUERY *** */
         BasicDBObject andFindQuery = new BasicDBObject();
         List<BasicDBObject> obj = new ArrayList<>();
-        if(!(F.keyWord == null))
+        if(F.keyWord!=null)
             obj.add(new BasicDBObject("Keywords.keyword", F.keyWord));
-        if(!(F.topic.equals("")))
+        if(F.topic!=null)
             obj.add(new BasicDBObject("Topic", F.topic));
-        if(!(F.author.equals("")))
+        if(F.author!=null)
             obj.add(new BasicDBObject("Authors", F.author)); 
-        if(!(F.newspaper.equals("")))
+        if(F.newspaper!=null)
             obj.add(new BasicDBObject("Newspaper", F.newspaper));
-       /* if(!(F.country == null))
+        //the newspapers we are acutaly scapring doesn't use country and region
+        //we will keep them in case of future widening in choice of newspapers 
+        if(F.country!=null)
             obj.add(new BasicDBObject("Country", F.country));
-        if(!(F.region == null))
-            obj.add(new BasicDBObject("Region", F.region));*/
-        if(!(F.city.equals("")))
+        if(F.region!=null)
+            obj.add(new BasicDBObject("Region", F.region));
+        //
+        if(F.city!=null)
             obj.add(new BasicDBObject("City", F.city));
+     
+        Date actualDate = new Date();
+        Date queryDate = subtractDays(actualDate, 15);
+        
+        obj.add(new BasicDBObject("date", BasicDBObjectBuilder.start( "$gte",queryDate).get()));
+ 
         andFindQuery.put("$and", obj);
-
-        System.out.println(andFindQuery.toString());
 
         MongoCursor<Document> cursor = collection.find(andFindQuery).iterator();
         try {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
-                //System.out.println(d.toJson());
                 Article A = new Article();
                 A.fromJSON(d);
                 resultArticles.add(A);
@@ -157,24 +199,22 @@ public class MongoDBManager {
     }
 
     public static LinkedHashMap<String, Long> calculateTrendingKeyWords() {
-        Long l=new Long(0);
+        Long valueOfKeyword=new Long(0);
         Map<String, Long> keyWordValue = new HashMap();
-        Integer valueOfKeyword;
-        SimpleDateFormat sdf = new SimpleDateFormat();
-        sdf.applyPattern("yyyy-MM-dd'T'HH:mm:ss.SSS\'Z\'");
-
+        
         Date actualDate = new Date();
 
         Date queryDate = subtractDays(actualDate, 100);
 
         MongoCollection<Document> collection = database.getCollection("Article");
-        // ArrayList<String> trendingKeywords = new ArrayList<>();
-        AggregateIterable<Document> results;
+        
         ArrayList<String> indexes=new ArrayList<>();
         indexes.add("$Occur");
         indexes.add("$NumberOfArticles");
         indexes.add("$NumberOfArticles");
         
+        AggregateIterable<Document> results;
+        //ValueOfKeyword=NumberOfArticles^2*Occ (Explained in the Documentation)
         results = collection.aggregate(Arrays.asList(
                 new Document("$match", new Document("date", new Document("$gt", queryDate))),
                 new Document("$unwind", "$Keywords"),
@@ -186,23 +226,15 @@ public class MongoDBManager {
                 new Document("$limit",500)));
 
         for (Document dbObject : results) {
-            //Formula NumeroArticoli^2*Occorenze
-            //Integer nOcc = dbObject.getInteger("Occur");
-           // Integer nArticle = dbObject.getInteger("NumberOfArticles");
-           // valueOfKeyword = nOcc * nArticle * nArticle;
-           // keyWordValue.put((String) dbObject.get("_id"), valueOfKeyword);
-            if(dbObject.get("Value").getClass()!=l.getClass())
-                l=Long.valueOf((Integer) dbObject.get("Value"));
+            if(dbObject.get("Value").getClass()!=valueOfKeyword.getClass())
+                valueOfKeyword=Long.valueOf((Integer) dbObject.get("Value"));
             else
-                l=(Long) dbObject.get("Value");
-           // Long l=new Long((long) dbObject.get("Value"));
-            keyWordValue.put((String) dbObject.get("_id"), l);
-            // System.out.println((String) dbObject.get("_id"));
-            // trendingKeywords.add((String) dbObject.get("_id"));
+                valueOfKeyword=(Long) dbObject.get("Value");
+            keyWordValue.put((String) dbObject.get("_id"), valueOfKeyword);
         }
+        
+        //Ordered Map by Value
         LinkedHashMap<String, Long> reverseSortedMap = new LinkedHashMap<>();
- 
-        //Use Comparator.reverseOrder() for reverse ordering
         keyWordValue.entrySet()
             .stream()
             .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())) 
@@ -262,7 +294,8 @@ public class MongoDBManager {
         collection.updateMany(new Document(),new Document("$unset",new Document("Keywords",1)));
     }
     /* ********************* END ARTICLE Management ************************* */
- /* *********************** VIEW Management ****************************** */
+    
+    /* *********************** VIEW Management ****************************** */
     public static void insertView(View s) {
         MongoCollection<Document> collection = database.getCollection("Search");
         Document docSearch = s.toJSON();
@@ -271,7 +304,7 @@ public class MongoDBManager {
 
     /* ********************  END VIEW Management **************************** */
 
- /* ********************** STATISTICS User Article *********************** */
+    /* ********************** STATISTICS User Article *********************** */
     // forse meglio match concatenato
     /**
      * This function finds the suggested articles of an user according to the
@@ -295,13 +328,14 @@ public class MongoDBManager {
         //forse le sue match si possono fare con un append!
         results = collection.aggregate(Arrays.asList(
                 new Document("$match", new Document("userID", u.userID)),
-                new Document("$match", new Document("date", new Document("$gt", queryDate))),
+                //new Document("$match", new Document("date", new Document("$gt", queryDate))),
                 new Document("$group", new Document("_id", "$filters").append("value", new Document("$sum", 1))),
                 new Document("$sort", new Document("value", -1)),
                 new Document("$limit", 3)));
         for (Document dbObject : results) {
             Document d = (Document) dbObject.get("_id");
             Filters f = new Filters();
+            System.out.println(d);
             f.fromJSON(d);
             suggestedArticles.addAll(findArticles(f));
             System.out.println(suggestedArticles);
@@ -313,7 +347,7 @@ public class MongoDBManager {
 
     /* ********************* END STATISTICS User Article ******************** */
 
- /* ************************ UTILITY functions *************************** */
+    /* ************************ UTILITY functions *************************** */
     /**
      *
      * @return List<String> This contains the 10 tranding words of the moment
