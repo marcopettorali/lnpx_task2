@@ -122,23 +122,23 @@ public class MongoDBManager {
         /* *** QUERY *** */
         BasicDBObject andFindQuery = new BasicDBObject();
         List<BasicDBObject> obj = new ArrayList<>();
-        if(F.keyWord!=null)
+        if(!(F.keyWord == null))
             obj.add(new BasicDBObject("Keywords.keyword", F.keyWord));
-        if(F.topic!=null)
+        if(!(F.topic == null))
             obj.add(new BasicDBObject("Topic", F.topic));
-        if(F.author!=null)
+        if(!(F.author.equals("")))
             obj.add(new BasicDBObject("Authors", F.author)); 
-        if(F.newspaper!=null)
+        if(!(F.newspaper.equals("")))
             obj.add(new BasicDBObject("Newspaper", F.newspaper));
-       /* if(F.country!=null)
+       /* if(!(F.country == null))
             obj.add(new BasicDBObject("Country", F.country));
-        if(F.region!=null)
+        if(!(F.region == null))
             obj.add(new BasicDBObject("Region", F.region));*/
-        if(F.city!=null)
+        if(!(F.city.equals("")))
             obj.add(new BasicDBObject("City", F.city));
         andFindQuery.put("$and", obj);
 
-        //System.out.println(andFindQuery.toString());
+        System.out.println(andFindQuery.toString());
 
         MongoCursor<Document> cursor = collection.find(andFindQuery).iterator();
         try {

@@ -1,8 +1,9 @@
 package lnpx.messages;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class ViewMsg {
+public class ViewMsg implements Serializable{
     private String linkArticle;
     private Map<String, String> filters;
 

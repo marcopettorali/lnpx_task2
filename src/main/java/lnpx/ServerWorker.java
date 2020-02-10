@@ -44,7 +44,7 @@ public class ServerWorker extends Thread {
     private void login() {
         try {
             LoginMsg msg = (LoginMsg) ois.readObject();
-            
+
             User u = MongoDBManager.userAuthentication(msg.getUsername(), msg.getPassword());
             if (u == null) {
                 send("LOGIN_R", new LoginResponseMsg(-1));
@@ -64,7 +64,7 @@ public class ServerWorker extends Thread {
     }
 
     private void trend() {
-       send("TREND_R", new TrendResponseMsg(ServerMain.getTrendingKeyWords()));
+        send("TREND_R", new TrendResponseMsg(ServerMain.getTrendingKeyWords()));
     }
 
     private void recommended() {
@@ -76,40 +76,34 @@ public class ServerWorker extends Thread {
         try {
             FindMsg msg = (FindMsg) ois.readObject();
 
-            String keyword = null;
-            String topic = null;
-            String author = null;
-            String newspaper = null;
-            String country = null;
-            String region = null;
-            String city = null;
+            String keyword = "";
+            String topic = "";
+            String author = "";
+            String newspaper = "";
+            String country = "";
+            String region = "";
+            String city = "";
 
             Map<String, String> filtersMap = msg.getFilters();
-            
+
             keyword = msg.getKeyword();
-            
-            if (filtersMap.containsKey(topic)) {
-                topic = filtersMap.get("topic");
-            }
-            if (filtersMap.containsKey(author)) {
-                author = filtersMap.get("author");
-            }
-            if (filtersMap.containsKey(newspaper)) {
-                newspaper = filtersMap.get("newspaper");
-            }
-            if (filtersMap.containsKey(country)) {
-                country = filtersMap.get("country");
-            }
-            if (filtersMap.containsKey(region)) {
-                region = filtersMap.get("region");
-            }
-            if (filtersMap.containsKey(city)) {
-                city = filtersMap.get("city");
-            }
+
+            topic = filtersMap.get("Topic");
+
+            author = filtersMap.get("Author");
+
+            newspaper = filtersMap.get("Newspaper");
+
+            country = filtersMap.get("Country");
+
+            region = filtersMap.get("Region");
+
+            city = filtersMap.get("City");
 
             Filters filters = new Filters(keyword, topic, author, newspaper, country, region, city);
+            
             send("SEARCH_R", new ArticlesResponseMsg(MongoDBManager.findArticles(filters)));
-                     
+
         } catch (IOException | ClassNotFoundException ex) {
             System.err.println(ex.getMessage());
         }
@@ -119,34 +113,28 @@ public class ServerWorker extends Thread {
         try {
             ViewMsg msg = (ViewMsg) ois.readObject();
 
-            String keyword = null;
-            String topic = null;
-            String author = null;
-            String newspaper = null;
-            String country = null;
-            String region = null;
-            String city = null;
+            String keyword = "";
+            String topic = "";
+            String author = "";
+            String newspaper = "";
+            String country = "";
+            String region = "";
+            String city = "";
 
             Map<String, String> filtersMap = msg.getFilters();
+            keyword = filtersMap.get("Keyword");
 
-            if (filtersMap.containsKey(topic)) {
-                topic = filtersMap.get("topic");
-            }
-            if (filtersMap.containsKey(author)) {
-                author = filtersMap.get("author");
-            }
-            if (filtersMap.containsKey(newspaper)) {
-                newspaper = filtersMap.get("newspaper");
-            }
-            if (filtersMap.containsKey(country)) {
-                country = filtersMap.get("country");
-            }
-            if (filtersMap.containsKey(region)) {
-                region = filtersMap.get("region");
-            }
-            if (filtersMap.containsKey(city)) {
-                city = filtersMap.get("city");
-            }
+            topic = filtersMap.get("Topic");
+
+            author = filtersMap.get("Author");
+
+            newspaper = filtersMap.get("Newspaper");
+
+            country = filtersMap.get("Country");
+
+            region = filtersMap.get("Region");
+
+            city = filtersMap.get("City");
 
             Filters filters = new Filters(keyword, topic, author, newspaper, country, region, city);
             //get current time
@@ -188,8 +176,8 @@ public class ServerWorker extends Thread {
         try {
             ChangeSitesMsg msg = (ChangeSitesMsg) ois.readObject();
             List<String> accounts = new ArrayList<>();
-            for(String key : msg.getSites().keySet()){
-                if(msg.getSites().get(key)){
+            for (String key : msg.getSites().keySet()) {
+                if (msg.getSites().get(key)) {
                     accounts.add(key);
                 }
             }
@@ -205,6 +193,7 @@ public class ServerWorker extends Thread {
             try {
                 dos.writeUTF(cmd);
                 oos.writeObject(msg);
+                System.out.println("Sent " + msg.getClass().getSimpleName() + " to " + user.userID + "@" + socket.getInetAddress().getHostAddress());
             } catch (IOException ioe) {
                 System.err.println(ioe.getMessage());
             }
@@ -225,6 +214,7 @@ public class ServerWorker extends Thread {
         while (true) {
             try {
                 String cmd = dis.readUTF();
+                System.out.println("Received " + cmd + " from " + socket.getInetAddress().getHostAddress());
                 switch (cmd) {
                     case "SIGN_IN":
                         signIn();
@@ -261,7 +251,13 @@ public class ServerWorker extends Thread {
                         break;
                 }
             } catch (IOException ex) {
-                System.err.println(ex.getMessage());
+                try {
+                    socket.close();
+                    System.err.println("Connection closed by " + user.userID + "@" + socket.getInetAddress().getHostAddress());
+                    break;
+                } catch (IOException ex1) {
+                    System.err.println(ex1.getMessage());
+                }
             }
         }
     }

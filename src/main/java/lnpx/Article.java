@@ -1,11 +1,12 @@
 package lnpx;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 
-public class Article {
+public class Article implements Serializable{
 
     public String Title;            //mandatory
     public String Link;             //mandatory
