@@ -88,15 +88,54 @@ public class ServerWorker extends Thread {
             Map<String, String> filtersMap = msg.getFilters();
 
             keyword = msg.getKeyword();
-            if(filtersMap.get("Topic") == null)
-                topic = "";
-            else
-                topic = filtersMap.get("Topic");
-            author = filtersMap.get("Author");
-            newspaper = filtersMap.get("Newspaper");
-            country = filtersMap.get("Country");
-            region = filtersMap.get("Region");
-            city = filtersMap.get("City");
+           
+          if(filtersMap.get("Topic")==null){
+              topic=null;
+          }
+          else{
+              topic=filtersMap.get("Topic");
+          }
+          
+          if(filtersMap.get("Author").equals("")){
+              author=null;
+          }
+          else{
+              author=filtersMap.get("Author");
+          }
+          
+          if(filtersMap.get("Newspaper").equals("")){
+              newspaper=null;
+          }
+          else{
+              newspaper=filtersMap.get("Newspaper");
+          }
+          
+          if(filtersMap.get("Country").equals("")){
+              country=null;
+          }
+          else{
+              country=filtersMap.get("Country");
+          }
+          
+          if(filtersMap.get("Region").equals("")){
+              region=null;
+          }
+          else{
+              region=filtersMap.get("Region");
+          }
+          
+          if(filtersMap.get("City").equals("")){
+              city=null;
+          }
+          else{
+              city=filtersMap.get("City");
+          }
+          
+          if(keyword.equals("")){
+              keyword=null;
+          }
+          
+           
             Filters filters = new Filters(keyword, topic, author, newspaper, country, region, city);
             send("SEARCH_R", new ArticlesResponseMsg(MongoDBManager.findArticles(filters)));
         } catch (IOException | ClassNotFoundException ex) {

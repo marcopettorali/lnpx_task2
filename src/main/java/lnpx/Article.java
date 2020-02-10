@@ -21,7 +21,96 @@ public class Article implements Serializable{
     public String Region;
     public String City;
     public Map<String, Integer> keyWordAnalysis; //pensa a come trasformare la keyword doc in un Map
+    
+    public String getTitle() {
+        return Title;
+    }
 
+    public String getLink() {
+        return Link;
+    }
+
+    public List<String> getTopic() {
+        return Topic;
+    }
+
+    public List<String> getAuthors() {
+        return Authors;
+    }
+
+    public String getNewspaper() {
+        return Newspaper;
+    }
+
+    public String getText() {
+        return Text;
+    }
+
+    public Date getDate() {
+        return Date;
+    }
+
+    public String getCountry() {
+        return Country;
+    }
+
+    public String getRegion() {
+        return Region;
+    }
+
+    public String getCity() {
+        return City;
+    }
+
+    public Map<String, Integer> getKeyWordAnalysis() {
+        return keyWordAnalysis;
+    }
+
+    public void setTitle(String Title) {
+        this.Title = Title;
+    }
+
+    public void setLink(String Link) {
+        this.Link = Link;
+    }
+
+    public void setTopic(List<String> Topic) {
+        this.Topic = Topic;
+    }
+
+    public void setAuthors(List<String> Authors) {
+        this.Authors = Authors;
+    }
+
+    public void setNewspaper(String Newspaper) {
+        this.Newspaper = Newspaper;
+    }
+
+    public void setText(String Text) {
+        this.Text = Text;
+    }
+
+    public void setDate(Date Date) {
+        this.Date = Date;
+    }
+
+    public void setCountry(String Country) {
+        this.Country = Country;
+    }
+
+    public void setRegion(String Region) {
+        this.Region = Region;
+    }
+
+    public void setCity(String City) {
+        this.City = City;
+    }
+
+    public void setKeyWordAnalysis(Map<String, Integer> keyWordAnalysis) {
+        this.keyWordAnalysis = keyWordAnalysis;
+    }
+   
+    
     public Document toJSON() {
         Document docArticle = new Document("Title", this.Title).append("Link", this.Link).append("Topic", this.Topic).append("Newspaper", this.Newspaper).append("Text", this.Text).append("date", this.Date);
         if (this.Authors != null) {
