@@ -136,6 +136,9 @@ public class MongoDBManager {
      * @param a 
      */
     public static void insertArticle(Article a) {
+        if(a.getText() == null){
+            return;
+        }
         MongoCollection<Document> collection = database.getCollection("Article");
         Document docArticle = a.toJSON();
         collection.insertOne(docArticle);
@@ -243,7 +246,6 @@ public class MongoDBManager {
             .stream()
             .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())) 
             .forEachOrdered(x -> reverseSortedMap.put(x.getKey(), x.getValue()));
-        System.out.println(reverseSortedMap);
         
         return reverseSortedMap;
     }

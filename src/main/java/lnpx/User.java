@@ -1,9 +1,10 @@
 package lnpx;
 
+import java.io.Serializable;
 import java.util.Date;
 import org.bson.Document;
 
-public class User {
+public class User implements Serializable{
 
     public String userID;
     public String firstName;
