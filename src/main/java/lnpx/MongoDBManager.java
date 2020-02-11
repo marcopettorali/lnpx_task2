@@ -283,7 +283,7 @@ public class MongoDBManager {
         try {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
-                System.out.println(d.toJson());
+                //System.out.println(d.toJson());
                 Article A = new Article();
                 A.fromJSON(d);
                 resultArticles.add(A);
@@ -298,6 +298,11 @@ public class MongoDBManager {
     public static void deleteKeywordAnalysis(){
         MongoCollection<Document> collection = database.getCollection("Article");
         collection.updateMany(new Document(),new Document("$unset",new Document("Keywords",1)));
+    }
+    
+    public static void deleteArticleNoKeywords(){
+         MongoCollection<Document> collection = database.getCollection("Article");
+         collection.deleteMany(new Document("Keywords",new Document("$exists",false)));
     }
     /* ********************* END ARTICLE Management ************************* */
     
