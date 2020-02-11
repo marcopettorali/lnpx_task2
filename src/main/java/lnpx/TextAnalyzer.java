@@ -128,16 +128,24 @@ public class TextAnalyzer {
         return sortedMap;
     }
 
-    public static Map<String, Integer> keywordAnalysis(String text) throws Exception {
+    public static Map<String, Integer> keywordAnalysis(String text){
+        if(text == null){
+            return null;
+        }
+        try {
+            loadTintPipeline();
+            loadAuxiliaryWords();
 
-        loadTintPipeline();
-        loadAuxiliaryWords();
+            List<String> keywords = getKeywords(text);
 
-        List<String> keywords = getKeywords(text);
+            Map<String, Integer> wordsCount = sortMapByValue(countWordsOccurrences(normalizeAndFilter(keywords)));
 
-        Map<String, Integer> wordsCount = sortMapByValue(countWordsOccurrences(normalizeAndFilter(keywords)));
-
-        return wordsCount;
+            return wordsCount;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println(text);
+        }
+        return null;
     }
 
 }

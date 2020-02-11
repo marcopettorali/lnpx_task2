@@ -3,9 +3,16 @@ package lnpx;
 public class ServerAsynchronousWorker extends Thread {
 
     private static Boolean working;
+    
+    static{
+        working = false;
+    }
 
     public static boolean isWorking() {
         synchronized (working) {
+            if(working){
+                System.out.println("Scraping already working");
+            }
             return working;
         }
     }
@@ -18,13 +25,14 @@ public class ServerAsynchronousWorker extends Thread {
 
     @Override
     public void run() {
+        System.out.println("ServerAsynchronousWorker built");
         while (true) {
-            round();
             try {
-                Thread.sleep((long) (ServerMain.getScrapingPeriod() * 1000));
+                Thread.sleep((long) (ServerMain.getScrapingPeriod() * 1000 * 60));
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
+            round();
         }
     }
 

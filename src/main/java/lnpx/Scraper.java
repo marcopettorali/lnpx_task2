@@ -751,25 +751,26 @@ public class Scraper {
         List<String> result = new ArrayList<>();
         for (String s : account) {
             switch (s) {
-                case "La Repubblica":
+                case "Repubblica":
                     result.add("repubblica");
                     break;
-                case "Il Corriere della Sera":
+                case "Corriere":
                     result.add("Corriere");
                     break;
-                case "ANSA":
+                case "Ansa":
                     result.add("Agenzia_Ansa");
                     break;
-                case "Sky TG24":
+                case "SkyTG24":
                     result.add("SkyTG24");
                     break;
             }
         }
         accountToScrape = result.toArray(new String[0]);
+        
     }
 
     public static void scrape() {
-
+        printAccountToScrape();
         PropertyConfigurator.configure("log4j.properties");
         Twitter twitter = getTwitterFactory();
         List<statusList> statuslist = new ArrayList<>();
@@ -818,5 +819,15 @@ public class Scraper {
                 java.util.logging.Logger.getLogger(Scraper.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+    
+    //DEBUG
+    private static void printAccountToScrape(){
+        System.out.println("**********************");
+        System.out.println("Scraping these sites:");
+        for(String s : accountToScrape){
+            System.out.println(s);
+        }
+        System.out.println("**********************");
     }
 }
