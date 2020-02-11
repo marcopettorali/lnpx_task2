@@ -3,6 +3,10 @@ package lnpx;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.client.*;
+import com.mongodb.client.model.Aggregates;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import org.bson.Document;
@@ -182,7 +186,7 @@ public class MongoDBManager {
         obj.add(new BasicDBObject("date", BasicDBObjectBuilder.start( "$gte",queryDate).get()));
  
         andFindQuery.put("$and", obj);
-
+        
         MongoCursor<Document> cursor = collection.find(andFindQuery).iterator();
         try {
             while (cursor.hasNext()) {
@@ -327,8 +331,7 @@ public class MongoDBManager {
         AggregateIterable<Document> results;
         //forse le sue match si possono fare con un append!
         results = collection.aggregate(Arrays.asList(
-                new Document("$match", new Document("userID", u.userID)),
-                new Document("$match", new Document("dateRead", BasicDBObjectBuilder.start( "$gte",queryDate).get())),
+                Aggregates.match(and(eq("userID",u.userID),gte("dateRead",queryDate))),
                 new Document("$group", new Document("_id", "$filters").append("value", new Document("$sum", 1))),
                 new Document("$sort", new Document("value", -1)),
                 new Document("$limit", 3)));
@@ -338,7 +341,6 @@ public class MongoDBManager {
             System.out.println(d);
             f.fromJSON(d);
             suggestedArticles.addAll(findArticles(f));
-            System.out.println(suggestedArticles);
 
         }
         return suggestedArticles;
@@ -376,5 +378,10 @@ public class MongoDBManager {
         obj.put("userID", 1);
         collection.createIndex(obj);
 
+    }
+    
+    public static void closeDB()
+    {
+        mongoClient.close();
     }
 }
