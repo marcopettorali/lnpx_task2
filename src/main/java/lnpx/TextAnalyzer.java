@@ -10,7 +10,8 @@ import java.util.*;
 import java.util.stream.*;
 
 public class TextAnalyzer {
-
+    
+    private static int ErrCounter = 0;
     private static List<String> auxWords;
     private static TintPipeline pipeline;
 
@@ -49,11 +50,37 @@ public class TextAnalyzer {
         }
     }
 
+    private static String cleanText(String text){
+        String T;
+        if(text.length() > 2500){
+            T = text.substring(0, 2500);
+        }else{
+            T = text;
+        }
+        T = T.replaceAll("[-+?.^:,;«»—’“”()\"]"," ").replaceAll("E'", "").replaceAll("d ", "").replaceAll("quest ", "").replaceAll("nell ", "").replaceAll("dell ", "").replaceAll(" l ", " ").replaceAll("dall ", "").replaceAll("km", "").replaceAll("à", "a");
+        int i = 0;
+        int AsciiCode;
+        char currentChar;
+        while(i < T.length()){
+            currentChar = T.charAt(i);
+            AsciiCode = (int) currentChar;
+            if(AsciiCode < 65 || (AsciiCode > 90 && AsciiCode < 97) && AsciiCode > 122){
+                T = T.replaceAll(String.valueOf(AsciiCode), "");
+            }else{
+                if(i>0 && i < T.length()-1 && T.charAt(i-1)==' ' && T.charAt(i+1)==' ')
+                    T = T.replaceAll(" " + currentChar + " ", " ");
+            }
+            i++;
+        }
+        T = T.replaceAll("\\s+", " ");
+        return T;
+    }
+    
     private static List<String> getKeywords(String text) throws Exception {
 
         //Tint doesn't work with these punctuation marks
-        text = text.replaceAll("\"", ",").replaceAll("-", ",").replaceAll("”", ",").trim();
-
+        text = cleanText(text).trim();
+        
         List<String> words = new ArrayList<>();
         List<String> roles = new ArrayList<>();
 
@@ -143,7 +170,6 @@ public class TextAnalyzer {
             return wordsCount;
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println(text);
         }
         return null;
     }

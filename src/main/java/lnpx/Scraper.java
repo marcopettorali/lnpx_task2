@@ -540,6 +540,7 @@ public class Scraper {
             article.Newspaper = "SKY TG 24";
             log.info("GIORNALE: " + article.Newspaper);
             Document doc = Jsoup.connect(articleLink).get();
+            article.Link = articleLink;
             log.info("LINK: " + articleLink);
             //----TITOLO----//
             Elements titoloClass = doc.getElementsByClass("c-article__title-label");

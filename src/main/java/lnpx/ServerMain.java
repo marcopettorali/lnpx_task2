@@ -1,6 +1,8 @@
 package lnpx;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ServerMain {
 
@@ -72,15 +74,13 @@ public class ServerMain {
     }
 
     public static void articleTextAnalysis() {
-        Filters fi = new Filters();
-        ArrayList<Article> art = MongoDBManager.findArticles(fi);
+        ArrayList<Article> art = MongoDBManager.findArticlesNoKeywords();
         for (int i = 0; i < art.size(); i++) {
-            try {
-                MongoDBManager.insertKeywordAnalysis(art.get(i), TextAnalyzer.keywordAnalysis(art.get(i).Text));
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+            Map<String, Integer> KA = TextAnalyzer.keywordAnalysis(art.get(i).Title + " " +art.get(i).Text);
+                if(KA != null){
+                    MongoDBManager.insertKeywordAnalysis(art.get(i), KA);
+                }
+        } 
         MongoDBManager.calculateTrendingKeyWords();
     }
 }

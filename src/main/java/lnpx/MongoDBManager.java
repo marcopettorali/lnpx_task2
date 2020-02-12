@@ -267,9 +267,9 @@ public class MongoDBManager {
         setQuery.append("$set", newUpdate);
 
         BasicDBObject queryArticle = new BasicDBObject();
-        queryArticle.append("Link", a.Link);
-
-        collection.updateOne(queryArticle, setQuery);
+        queryArticle.append("Title", a.Title);
+        
+        collection.updateMany(queryArticle, setQuery);
     }
 
     public static ArrayList<Article> findArticlesNoKeywords() {
@@ -283,7 +283,6 @@ public class MongoDBManager {
         try {
             while (cursor.hasNext()) {
                 Document d = cursor.next();
-                //System.out.println(d.toJson());
                 Article A = new Article();
                 A.fromJSON(d);
                 resultArticles.add(A);

@@ -44,6 +44,7 @@ public class ServerAsynchronousWorker extends Thread {
         setWorking(true);
         Scraper.scrape();
         ServerMain.articleTextAnalysis();
+        MongoDBManager.deleteArticleNoKeywords();
         ServerMain.setTrendingKeyWords(MongoDBManager.calculateTrendingKeyWords());
         setWorking(false);
         System.out.println("Scraping round ended");
