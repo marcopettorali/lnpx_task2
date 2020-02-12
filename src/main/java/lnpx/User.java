@@ -13,6 +13,7 @@ public class User implements Serializable{
     public String email;
     public String password;
     public boolean adminStatus; //true=admin ; false=simple user
+    public int views;
 
     public User() {
     }
@@ -25,6 +26,7 @@ public class User implements Serializable{
         this.email = email;
         this.password = password;
         this.adminStatus = adminStatus;
+        this.views=0;
     }
 
     public Document toJSON() {
@@ -48,6 +50,15 @@ public class User implements Serializable{
         this.email = d.getString("email");
         this.password = d.getString("password");
         this.adminStatus = d.getBoolean("adminStatus");
+        this.views=0;
+    }
+
+    public void setViews(int views) {
+        this.views = views;
+    }
+
+    public int getViews() {
+        return views;
     }
     
       public String getUserID() {
