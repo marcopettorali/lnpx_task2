@@ -82,12 +82,14 @@ public class MongoDBManager {
         FindIterable<Document> allUsers = collection.find();
         for (Document dbUser : allUsers) {
             actualUser.fromJSON(dbUser);
+             actualUser.setViews(0);
             usersInfo.put(actualUser, 0);
         }
         
         for (Document dbObject : results) {
             FindIterable<Document> d = collection.find(new Document("userID", (String) dbObject.get("_id")));
             actualUser.fromJSON(d.first());
+            actualUser.setViews((int) dbObject.get("value"));
             usersInfo.put(actualUser, (Integer) dbObject.get("value"));
         }
 
