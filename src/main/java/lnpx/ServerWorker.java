@@ -89,7 +89,7 @@ public class ServerWorker extends Thread {
 
             keyword = msg.getKeyword();
            
-          if(filtersMap.get("Topic")==null){
+          if(filtersMap.get("Topic").equals("")){
               topic=null;
           }
           else{
