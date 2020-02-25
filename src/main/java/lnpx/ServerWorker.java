@@ -193,7 +193,15 @@ public class ServerWorker extends Thread {
     private void clients() {
 
         List<User> users = new ArrayList<>();
-        users.addAll(MongoDBManager.retrieveUsersInformation().keySet());
+        Map<User,Integer> res = MongoDBManager.retrieveUsersInformation();
+        for(Map.Entry<User,Integer> entry: res.entrySet()){
+            
+            entry.getKey().setViews(entry.getValue());
+            
+        }
+        
+        
+        users.addAll(res.keySet());
         send("CLIENTS_R", new ClientsResponseMsg(users));
 
     }
