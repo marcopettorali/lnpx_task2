@@ -243,7 +243,7 @@ public class ServerWorker extends Thread {
             try {
                 dos.writeUTF(cmd);
                 oos.writeObject(msg);
-                System.out.println("Sent " + msg.getClass().getSimpleName() + " to " + user.userID + "@" + socket.getInetAddress().getHostAddress());
+                //System.out.println("Sent " + msg.getClass().getSimpleName() + " to " + user.userID + "@" + socket.getInetAddress().getHostAddress());
             } catch (IOException ioe) {
                 System.err.println(ioe.getMessage());
             }
