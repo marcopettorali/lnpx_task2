@@ -163,6 +163,11 @@ public class ServerWorker extends Thread {
             country = filtersMap.get("Country");
             region = filtersMap.get("Region");
             city = filtersMap.get("City");
+            if(keyword.equals(""))
+            {
+                keyword=null;
+            }
+            
             if(topic.equals(""))
             {
                 topic= null;
