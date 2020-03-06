@@ -75,12 +75,14 @@ public class ServerMain {
 
     public static void articleTextAnalysis() {
         ArrayList<Article> art = MongoDBManager.findArticlesNoKeywords();
+        String textToAnalyze;
         for (int i = 0; i < art.size(); i++) {
-            Map<String, Integer> KA = TextAnalyzer.keywordAnalysis(art.get(i).Title + " " +art.get(i).Text);
+            textToAnalyze=art.get(i).Title + " " +art.get(i).Text;
+            textToAnalyze=textToAnalyze.toLowerCase();
+            Map<String, Integer> KA = TextAnalyzer.keywordAnalysis(textToAnalyze/*art.get(i).Title + " " +art.get(i).Text*/);
                 if(KA != null){
                     MongoDBManager.insertKeywordAnalysis(art.get(i), KA);
                 }
         } 
-        MongoDBManager.calculateTrendingKeyWords();
     }
 }

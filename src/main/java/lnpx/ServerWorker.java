@@ -163,7 +163,10 @@ public class ServerWorker extends Thread {
             country = filtersMap.get("Country");
             region = filtersMap.get("Region");
             city = filtersMap.get("City");
-            
+            if(topic.equals(""))
+            {
+                topic= null;
+            }
             if(author.equals("")){
                 author = null;
             }

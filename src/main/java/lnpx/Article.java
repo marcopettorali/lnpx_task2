@@ -137,7 +137,7 @@ public class Article implements Serializable{
         this.Authors = (List<String>) d.get("Authors");
         this.Newspaper = (String) d.get("Newspaper");
         this.Text = (String) d.get("Text");
-        this.Date = (Date) d.get("Date");
+        this.Date = (Date) d.get("date");
         this.Country = (String) d.get("Country");
         this.Region = (String) d.get("Region");
         this.City = (String) d.get("City");
