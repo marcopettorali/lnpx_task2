@@ -477,8 +477,9 @@ public class Scraper {
             Elements dataClass = doc.getElementsByClass("news-time");
             if (!dataClass.isEmpty()) {
                 Element data = dataClass.get(0);
+                boolean found = false;
                 for (Element d : data.children()) {
-                    if (d.is("em") || d.is("strong")) {
+                    if (!found && (d.is("em") || d.is("strong"))) {
                         try {
                             article.Date = df.parse(getStringDate(d.text()));
                             log.info("DATA: " + getStringDate(d.text()));
@@ -487,8 +488,13 @@ public class Scraper {
                             article.Date = new java.util.Date();
                             log.info("DATA: " + new java.util.Date());
                         }
-
+                        found = true;
                     }
+                }
+                if(!found){
+                    log.warn("L'applicazione non è in grado di risalire alla data dell'articolo. " + articleLink + "data impostata ad oggi.");
+                    article.Date = new java.util.Date();
+                    log.info("DATA: " + new java.util.Date());
                 }
             } else {
                 log.warn("L'applicazione non è in grado di risalire alla data dell'articolo. " + articleLink + "data impostata ad oggi.");

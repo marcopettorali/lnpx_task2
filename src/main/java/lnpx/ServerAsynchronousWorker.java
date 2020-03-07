@@ -27,6 +27,7 @@ public class ServerAsynchronousWorker extends Thread {
     public void run() {
         System.out.println("ServerAsynchronousWorker built");
         while (true) {
+            //round();
             try {
                 Thread.sleep((long) (ServerMain.getScrapingPeriod() * 1000 * 60));
             } catch (InterruptedException ex) {

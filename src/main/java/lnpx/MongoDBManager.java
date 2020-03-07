@@ -15,13 +15,20 @@ import org.bson.Document;
 Ricordiamo di chiamare la mongoDB close
  */
 public class MongoDBManager {
-
-    private static final MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
+    private static final MongoClient mongoClient = MongoClients.create("mongodb://"
+            + "myUserAdmin:abc123@"
+            + "172.16.1.5:27017,"
+            + "172.16.1.7:27018,"
+            + "172.16.1.8:27019"
+            + "/?readPreference=primaryPreferred"); 
+    
+    //private static final MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
+   
     private static final MongoDatabase database = mongoClient.getDatabase("Article");
 
     /* ********************* USER Management ******************************** */
     /**
-     * This function inserts an user if the userID Chosen is free
+     * This function inserts an user if the userID chosen is available
      * @param u
      * @return 
      */
@@ -45,11 +52,7 @@ public class MongoDBManager {
     public static User userAuthentication(String userId, String password) {
         User u = null;
         MongoCollection<Document> collection = database.getCollection("Users");
-        BasicDBObject andFindQuery = new BasicDBObject();
-        List<BasicDBObject> obj = new ArrayList<>();
-        obj.add(new BasicDBObject("userID", userId));
-        obj.add(new BasicDBObject("password", password));
-        andFindQuery.put("$and", obj);
+        Document andFindQuery=new Document("userID", userId).append("password", password);
         MongoCursor<Document> cursor = collection.find(andFindQuery).iterator();
         try {
             if (cursor.hasNext()) {
@@ -66,10 +69,12 @@ public class MongoDBManager {
      * This function retive for each user the number of search done, 
      * this function is used by the admins to have an overview of the most active 
      * users
-     * @return  Map<User, Integer
+     * @return  
      */
     public static Map<User, Integer> retrieveUsersInformation() {
-        User actualUser = new User();
+        User actualUser;
+        ArrayList<String> usersWithSearchs=new ArrayList<>();
+        
         Map<User, Integer> usersInfo = new HashMap();
         
         MongoCollection<Document> collection = database.getCollection("Search");
@@ -78,19 +83,25 @@ public class MongoDBManager {
                 new Document("$group", new Document("_id", "$userID").append("value", new Document("$sum", 1))),
                 new Document("$sort", new Document("value", -1))));
         
+        //once the aggregation query is executed we need to retrive each user informations
         collection = database.getCollection("Users");
-        FindIterable<Document> allUsers = collection.find();
-        for (Document dbUser : allUsers) {
-            actualUser.fromJSON(dbUser);
-             actualUser.setViews(0);
-            usersInfo.put(actualUser, 0);
-        }
-        
         for (Document dbObject : results) {
+            actualUser=new User();
             FindIterable<Document> d = collection.find(new Document("userID", (String) dbObject.get("_id")));
             actualUser.fromJSON(d.first());
             actualUser.setViews((int) dbObject.get("value"));
             usersInfo.put(actualUser, (Integer) dbObject.get("value"));
+            usersWithSearchs.add(actualUser.getUserID());
+        }
+        
+        //now we need to restirve the infomarions of the users with 0 searches
+        Document usersNotInSearch=new Document("userID",new Document("$nin",usersWithSearchs));
+        FindIterable<Document> allUsersNoSearches = collection.find(usersNotInSearch);
+        for (Document dbUser : allUsersNoSearches) {
+            actualUser= new User();
+            actualUser.fromJSON(dbUser);
+            actualUser.setViews(0);
+            usersInfo.put(actualUser, 0);
         }
 
         return usersInfo;
@@ -123,6 +134,7 @@ public class MongoDBManager {
             u.lastName=LName[j];
             u.email=FName[i]+LName[j]+"@gmail.com";
             u.password=FName[i]+LName[j];
+            u.dateOfBirth=subtractDays(new Date(),(i+j+18)*350);
             u.adminStatus=false;
             insertUser(u);
         }
@@ -134,7 +146,7 @@ public class MongoDBManager {
     
     /********************* ARTICLE Management ******************************* */
     /**
-     * This function s used to insert and Article in the Database
+     * This function is used to insert and Article in the Database
      * @param a 
      */
     public static void insertArticle(Article a) {
@@ -146,11 +158,11 @@ public class MongoDBManager {
         collection.insertOne(docArticle);
     }
 
-    /*public static void printArticles() {
+    public static void printArticles() {
         MongoCollection<Document> collection = database.getCollection("Article");
-        FindIterable<Document> d = collection.find();
-        System.out.println(collection.countDocuments());
-    }*/
+        MongoCursor<Document> d = collection.find().iterator();
+        System.out.println( d.next().toString());
+    }
 
     /**
      * This function retrives the articles that match the chosen Filters
@@ -186,7 +198,7 @@ public class MongoDBManager {
             obj.add(new BasicDBObject("City", F.city));
      
         Date actualDate = new Date();
-        Date queryDate = subtractDays(actualDate, 20);
+        Date queryDate = subtractDays(actualDate, 7);
         
         obj.add(new BasicDBObject("date", BasicDBObjectBuilder.start( "$gte",queryDate).get()));
  
@@ -213,7 +225,7 @@ public class MongoDBManager {
         
         Date actualDate = new Date();
 
-        Date queryDate = subtractDays(actualDate, 100);
+        Date queryDate = subtractDays(actualDate, 7);
 
         MongoCollection<Document> collection = database.getCollection("Article");
         
@@ -278,8 +290,8 @@ public class MongoDBManager {
         MongoCollection<Document> collection = database.getCollection("Article");
         ArrayList<Article> resultArticles = new ArrayList<>();
         /* *** QUERY *** */
-        BasicDBObject FindQuery = new BasicDBObject();
-        FindQuery.append("Keywords", new BasicDBObject("$exists", false));
+        Document FindQuery = new Document();
+        FindQuery.append("Keywords", new Document("$exists", false));
 
         MongoCursor<Document> cursor = collection.find(FindQuery).iterator();
         try {
@@ -317,13 +329,12 @@ public class MongoDBManager {
     /* ********************  END VIEW Management **************************** */
 
     /* ********************** STATISTICS User Article *********************** */
-    // forse meglio match concatenato
     /**
      * This function finds the suggested articles of an user according to the
      * three most used filters
      *
      * @param u needed to retive user information
-     * @return suggestedArticles Array of suggested articles for the specifi
+     * @return suggestedArticles Array of suggested articles for the specific
      * user
      */
     public static ArrayList<Article> suggestedArticles(User u) {
@@ -359,8 +370,8 @@ public class MongoDBManager {
 
     /* ************************ UTILITY functions *************************** */
     /**
-     *
-     * @return List<String> This contains the 10 tranding words of the moment
+     * This function offers an easy way to subtract days from a date
+     * @return 
      */
     private static Date subtractDays(Date date, int days) {
         GregorianCalendar cal = new GregorianCalendar();
