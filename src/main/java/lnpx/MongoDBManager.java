@@ -111,11 +111,11 @@ public class MongoDBManager {
      * This function delete an user and all his history 
      * @param u 
      */
-    public static void deleteUser(User u) {
+    public static void deleteUser(String userID) {
         MongoCollection<Document> collection = database.getCollection("Search");
-        collection.deleteMany(new Document("userID", u.userID));
+        collection.deleteMany(new Document("userID", userID));
         collection = database.getCollection("Users");
-        collection.deleteMany(new Document("userID", u.userID));
+        collection.deleteMany(new Document("userID", userID));
     }
     /**
      * This function is used to fill the User collection for indexes statistics

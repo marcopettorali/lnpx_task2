@@ -245,6 +245,17 @@ public class ServerWorker extends Thread {
             System.err.println(ex.getMessage());
         }
     }
+    
+    private void deleteUser(){
+        try {
+            DeleteUserMsg msg = (DeleteUserMsg) ois.readObject();
+            
+            MongoDBManager.deleteUser(msg.getUsername());
+            send("ACK", new ACKMsg(""));
+        } catch (IOException | ClassNotFoundException ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
 
     private void send(String cmd, Serializable msg) {//06
         synchronized (socket) {
@@ -303,6 +314,9 @@ public class ServerWorker extends Thread {
                         break;
                     case "CHANGE_SITES":
                         changeSites();
+                        break;
+                    case "DELETE_USER":
+                        deleteUser();
                         break;
                     default:
                         System.out.println("ERROR: command '" + cmd + "' not found: ignoring.");
