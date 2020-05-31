@@ -1,7 +1,5 @@
 package lnpx;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Aggregates;
 import static com.mongodb.client.model.Filters.and;
@@ -11,16 +9,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import org.bson.Document;
 
-/*
-Ricordiamo di chiamare la mongoDB close
- */
+
 public class MongoDBManager {
-    private static final MongoClient mongoClient = MongoClients.create("mongodb://"
+   private static final MongoClient mongoClient = MongoClients.create("mongodb://"
             + "myUserAdmin:abc123@"
             + "172.16.1.5:27017,"
             + "172.16.1.7:27018,"
             + "172.16.1.8:27019"
-            + "/?readPreference=primaryPreferred"); 
+            + "/?readPreference=primaryPreferred");
     
     //private static final MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
    
@@ -34,7 +30,7 @@ public class MongoDBManager {
      */
     public static boolean insertUser(User u) {
         MongoCollection<Document> collection = database.getCollection("Users");
-        BasicDBObject idQuery = new BasicDBObject("userID", u.userID);
+        Document idQuery = new Document("userID", u.userID);
         if (collection.countDocuments(idQuery) != 0) {
             return false;
         }
@@ -115,7 +111,7 @@ public class MongoDBManager {
         MongoCollection<Document> collection = database.getCollection("Search");
         collection.deleteMany(new Document("userID", userID));
         collection = database.getCollection("Users");
-        collection.deleteMany(new Document("userID", userID));
+        collection.deleteOne(new Document("userID", userID));
     }
     /**
      * This function is used to fill the User collection for indexes statistics
@@ -177,32 +173,31 @@ public class MongoDBManager {
         
         ArrayList<Article> resultArticles = new ArrayList<>();
         /* *** QUERY *** */
-        BasicDBObject andFindQuery = new BasicDBObject();
-        List<BasicDBObject> obj = new ArrayList<>();
+        Document andFindQuery = new Document();
         if(F.keyWord!=null)
-            obj.add(new BasicDBObject("Keywords.keyword", F.keyWord));
+            andFindQuery.append("Keywords.keyword", F.keyWord);
         if(F.topic!=null)
-            obj.add(new BasicDBObject("Topic", F.topic));
+            andFindQuery.append("Topic", F.topic);
         if(F.author!=null)
-            obj.add(new BasicDBObject("Authors", F.author)); 
+            andFindQuery.append("Authors", F.author); 
         if(F.newspaper!=null)
-            obj.add(new BasicDBObject("Newspaper", F.newspaper));
-        //the newspapers we are acutaly scapring doesn't use country and region
+            andFindQuery.append("Newspaper", F.newspaper);
+        //the newspapers we are actually scraping doesn't use country and region
         //we will keep them in case of future widening in choice of newspapers 
         if(F.country!=null)
-            obj.add(new BasicDBObject("Country", F.country));
+            andFindQuery.append("Country", F.country);
         if(F.region!=null)
-            obj.add(new BasicDBObject("Region", F.region));
+           andFindQuery.append("Region", F.region);
         //
         if(F.city!=null)
-            obj.add(new BasicDBObject("City", F.city));
+            andFindQuery.append("City", F.city);
      
         Date actualDate = new Date();
         Date queryDate = subtractDays(actualDate, 7);
         
-        obj.add(new BasicDBObject("date", BasicDBObjectBuilder.start( "$gte",queryDate).get()));
+        andFindQuery.append("date", new Document( "$gte",queryDate));
  
-        andFindQuery.put("$and", obj);
+        //andFindQuery.put("$and", obj);
         
         MongoCursor<Document> cursor = collection.find(andFindQuery).iterator();
         try {
@@ -274,13 +269,13 @@ public class MongoDBManager {
             keyWordArray.add(keyword);
         }
         MongoCollection<Document> collection = database.getCollection("Article");
-        BasicDBObject newUpdate = new BasicDBObject();
+        Document newUpdate = new Document();
         newUpdate.append("Keywords", keyWordArray);
 
-        BasicDBObject setQuery = new BasicDBObject();
+        Document setQuery = new Document();
         setQuery.append("$set", newUpdate);
 
-        BasicDBObject queryArticle = new BasicDBObject();
+        Document queryArticle = new Document();
         queryArticle.append("Title", a.Title);
         
         collection.updateMany(queryArticle, setQuery);
@@ -348,7 +343,6 @@ public class MongoDBManager {
         MongoCollection<Document> collection = database.getCollection("Search");
         ArrayList<Article> suggestedArticles = new ArrayList<>();
         AggregateIterable<Document> results;
-        //forse le sue match si possono fare con un append!
         results = collection.aggregate(Arrays.asList(
                 Aggregates.match(and(eq("userID",u.userID),gte("dateRead",queryDate))),
                 new Document("$group", new Document("_id", "$filters").append("value", new Document("$sum", 1))),
@@ -359,7 +353,18 @@ public class MongoDBManager {
             Filters f = new Filters();
             System.out.println(d);
             f.fromJSON(d);
-            suggestedArticles.addAll(findArticles(f));
+            ArrayList<Article> articles=findArticles(f);
+            for(int i=0; i< articles.size();i++)
+            {
+                int j;
+                for(j=0; j<suggestedArticles.size();j++)
+                {
+                    if(suggestedArticles.get(j).getLink().compareTo(articles.get(i).getLink())==0)
+                        break;
+                }
+                if(j==suggestedArticles.size())
+                    suggestedArticles.add(articles.get(i));
+            }
 
         }
         return suggestedArticles;
@@ -384,17 +389,17 @@ public class MongoDBManager {
     /* ********************* INDEXES Management ***************************** */
     public static void createIndexes() {
         MongoCollection<Document> collection = database.getCollection("Article");
-        BasicDBObject obj = new BasicDBObject();
-        obj.put("Topic", 1); //
-        obj.put("Date", -1);
+        Document obj = new Document();
+        obj.append("Topic", 1); //
+        obj.append("Date", -1);
         collection.createIndex(obj);
-        obj = new BasicDBObject();
-        obj.put("Keywords.keyword", 1);
-        obj.put("Date", -1);
+        obj = new Document();
+        obj.append("Keywords.keyword", 1);
+        obj.append("Date", -1);
         collection.createIndex(obj);
         collection = database.getCollection("Users");
-        obj = new BasicDBObject();
-        obj.put("userID", 1);
+        obj = new Document();
+        obj.append("userID", 1);
         collection.createIndex(obj);
 
     }
