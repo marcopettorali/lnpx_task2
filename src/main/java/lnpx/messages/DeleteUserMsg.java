@@ -5,11 +5,10 @@
  */
 package lnpx.messages;
 
-/**
- *
- * @author rnoce
- */
-public class DeleteUserMsg {
+import java.io.Serializable;
+
+
+public class DeleteUserMsg implements Serializable{
     
     private String username;
 
