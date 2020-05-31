@@ -205,7 +205,14 @@ public class MongoDBManager {
                 Document d = cursor.next();
                 Article A = new Article();
                 A.fromJSON(d);
-                resultArticles.add(A);
+                int j;
+                for(j=0; j<resultArticles.size();j++)
+                {
+                    if(resultArticles.get(j).getTitle().compareTo(A.getTitle())==0)
+                        break;
+                }
+                if(j==resultArticles.size())
+                    resultArticles.add(A);
             }
         } finally {
             cursor.close();
@@ -359,7 +366,7 @@ public class MongoDBManager {
                 int j;
                 for(j=0; j<suggestedArticles.size();j++)
                 {
-                    if(suggestedArticles.get(j).getLink().compareTo(articles.get(i).getLink())==0)
+                    if(suggestedArticles.get(j).getTitle().compareTo(articles.get(i).getTitle())==0)
                         break;
                 }
                 if(j==suggestedArticles.size())
