@@ -8,16 +8,26 @@ public class ServerMain {
 
     private static LinkedHashMap<String, Long> trendingKeyWords;
     private static Double scrapingPeriod; //minutes
-    
-    static{
+
+    static {
         scrapingPeriod = 30.0;
     }
+    
+    static class closeDBConnections extends Thread {
 
+      @Override
+      public void run() {
+         MongoDBManager.closeDB();
+      }
+   }
     public static void main(String[] args) {
-        
+
+        //close db on exit
+        Runtime.getRuntime().addShutdownHook(new closeDBConnections());
+
         //create indexes
         MongoDBManager.createIndexes();
-        
+
         //create admin
         MongoDBManager.insertUser(new User("admin", "admin", "admin", new Date(), "admin@example.com", "admin", true));
 
@@ -28,7 +38,7 @@ public class ServerMain {
         ServerRequestListener listenerThread = new ServerRequestListener();
         listenerThread.setDaemon(true);
         listenerThread.start();
-        
+
         //Start scraping activity
         ServerAsynchronousWorker worker = new ServerAsynchronousWorker();
         worker.setDaemon(true);
@@ -77,12 +87,12 @@ public class ServerMain {
         ArrayList<Article> art = MongoDBManager.findArticlesNoKeywords();
         String textToAnalyze;
         for (int i = 0; i < art.size(); i++) {
-            textToAnalyze=art.get(i).Title + " " +art.get(i).Text;
-            textToAnalyze=textToAnalyze.toLowerCase();
+            textToAnalyze = art.get(i).Title + " " + art.get(i).Text;
+            textToAnalyze = textToAnalyze.toLowerCase();
             Map<String, Integer> KA = TextAnalyzer.keywordAnalysis(textToAnalyze/*art.get(i).Title + " " +art.get(i).Text*/);
-                if(KA != null){
-                    MongoDBManager.insertKeywordAnalysis(art.get(i), KA);
-                }
-        } 
+            if (KA != null) {
+                MongoDBManager.insertKeywordAnalysis(art.get(i), KA);
+            }
+        }
     }
 }
