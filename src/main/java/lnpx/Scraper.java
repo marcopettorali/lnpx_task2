@@ -669,6 +669,8 @@ public class Scraper {
                     Document t = Jsoup.connect(str).get();
                     String link = t.title();
                     if (link.contains("corriere.it") || link.contains(("sky.tg")) || link.contains("larep.it") || link.contains("csera.it") || link.contains("ansa.it") || link.contains("tg24.sky.it") || link.contains("repubblica.it")) {
+                        if(link.contains("blogautore"))
+                            return null;
                         return link;
                     } else {
                         if (link.contains("ow.ly")) {
