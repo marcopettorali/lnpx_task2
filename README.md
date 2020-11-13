@@ -18,7 +18,7 @@
 
 ### Authors 
 <ul>
-<li> Lorenzioni Dario  -  </li>
+<li> Lorenzoni Dario  -  </li>
 <li> Nocerino Raffaele - rafnocerino96@gmail.com</li>
 <li> Pettorali Marco   - marcopettorali1@gmail.com</li>
 <li> Xefraj Riccardo   - riccardoxefraj@yahoo.it</li>
