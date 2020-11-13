@@ -1,4 +1,4 @@
-# NewS_craper - A news analyzer
+# NewS_craper - A news analyzer (Server)
 
 ## Description of the system
 <p>The main purpose of this application is to provide to the users an overview of the trending topics using statistic reports based on the articles published by the most famous Italian online newspapers.</p> 
